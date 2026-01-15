@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 docker/.env
+amplicode.xml
 
 ### STS ###
 .apt_generated
