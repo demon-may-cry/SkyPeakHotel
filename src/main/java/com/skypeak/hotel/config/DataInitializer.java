@@ -1,15 +1,17 @@
 package com.skypeak.hotel.config;
 
-import com.skypeak.hotel.entity.Role;
-import com.skypeak.hotel.entity.User;
+import com.skypeak.hotel.entity.RoleEntity;
+import com.skypeak.hotel.entity.UserEntity;
 import com.skypeak.hotel.repository.RoleRepository;
 import com.skypeak.hotel.repository.UserRepository;
+import com.skypeak.hotel.security.SecurityConfig;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -25,6 +27,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${role.admin}")
     private String roleAdmin;
@@ -57,16 +60,17 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
-        Role adminRole = roleRepository.findByName(roleAdmin)
+        RoleEntity adminRoleEntity = roleRepository.findByName(roleAdmin)
                 .orElseThrow(() -> new IllegalStateException("ADMIN role not found"));
 
-        User userAdmin = new User();
-        userAdmin.setEmail(email);
-        userAdmin.setPassword(password);
-        userAdmin.setStatus(status);
-        userAdmin.setRole(adminRole);
+        UserEntity admin = new UserEntity();
 
-        userRepository.save(userAdmin);
+        admin.setEmail(email);
+        admin.setPassword(passwordEncoder.encode(password));
+        admin.setStatus(status);
+        admin.setRoleEntity(adminRoleEntity);
+
+        userRepository.save(admin);
         log.info("Admin with email {} created successfully", email);
     }
 
@@ -74,9 +78,9 @@ public class DataInitializer implements CommandLineRunner {
         List<String> roleList = Stream.of(roleAdmin, roleManager, roleUser).toList();
         for (String roleName : roleList) {
             if (roleRepository.findByName(roleName).isEmpty()) {
-                Role role = new Role();
-                role.setName(roleName);
-                roleRepository.save(role);
+                RoleEntity roleEntity = new RoleEntity();
+                roleEntity.setName(roleName);
+                roleRepository.save(roleEntity);
                 log.info("Role {} created", roleName);
             } else {
                 log.info("Role {} already exists", roleName);
