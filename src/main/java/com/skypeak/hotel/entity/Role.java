@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @author Дмитрий Ельцов
+ */
 @Getter
 @Setter
 @NoArgsConstructor

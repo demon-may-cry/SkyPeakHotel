@@ -9,6 +9,9 @@ import lombok.Setter;
 
 import java.util.UUID;
 
+/**
+ * @author Дмитрий Ельцов
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,6 +19,7 @@ import java.util.UUID;
 @Table(name = "users")
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false)
     private UUID id;
 
