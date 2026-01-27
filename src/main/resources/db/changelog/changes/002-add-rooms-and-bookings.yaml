@@ -1,0 +1,110 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: Dmitriy_Eltsov
+      changes:
+
+        - createTable:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: room_number
+                  type: varchar(10)
+                  constraints:
+                    unique: true
+                    nullable: true
+
+              - column:
+                  name: room_type
+                  type: varchar(30)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: price_per_night
+                  type: numeric(10,2)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: active
+                  type: boolean
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: description
+                  type: varchar(255)
+
+        - createTable:
+            tableName: bookings
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: room_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: check_in_date
+                  type: date
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: check_out_date
+                  type: date
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: status
+                  type: varchar(30)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: bookings
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_bookings_user
+
+        - addForeignKeyConstraint:
+            baseTableName: bookings
+            baseColumnNames: room_id
+            referencedTableName: rooms
+            referencedColumnNames: id
+            constraintName: fk_bookings_room
+
+        - sql:
+            sql: |
+              ALTER TABLE bookings
+              ADD CONSTRAINT chk_bookings_date
+              CHECK (check_out_date > check_in_date);
