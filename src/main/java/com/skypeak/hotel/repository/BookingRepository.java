@@ -18,6 +18,6 @@ public interface BookingRepository extends JpaRepository<BookingEntity, UUID> {
     boolean existsByRoom_IdAndStatusNotAndCheckInDateLessThanAndCheckOutDateGreaterThan(
             UUID id,
             BookingStatus status,
-            LocalDate checkInDate,
-            LocalDate checkOutDate);
+            LocalDate checkOutDate,
+            LocalDate checkInDate);
 }

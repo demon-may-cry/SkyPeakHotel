@@ -41,7 +41,7 @@ public class RoomEntity {
 
     @NotNull
     @Column(name = "active", nullable = false)
-    private Boolean active;
+    private boolean active;
 
     @Size(max = 255)
     @Column(name = "description")
