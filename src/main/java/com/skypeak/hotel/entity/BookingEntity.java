@@ -3,7 +3,6 @@ package com.skypeak.hotel.entity;
 import com.skypeak.hotel.entity.enums.BookingStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
