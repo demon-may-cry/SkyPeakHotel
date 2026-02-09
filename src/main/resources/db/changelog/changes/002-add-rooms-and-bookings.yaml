@@ -19,7 +19,7 @@ databaseChangeLog:
                   type: varchar(20)
                   constraints:
                     unique: true
-                    nullable: true
+                    nullable: false
 
               - column:
                   name: room_type

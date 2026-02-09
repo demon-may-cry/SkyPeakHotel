@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -29,7 +27,6 @@ public class RoomEntity {
     @Column(name = "room_number", nullable = false, unique = true, length = 20)
     private String roomNumber;
 
-    @Size(max = 30)
     @Enumerated(EnumType.STRING)
     @NotNull
     @Column(name = "room_type", nullable = false, length = 30)

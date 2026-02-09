@@ -1,4 +1,4 @@
-package com.skypeak.hotel.dto;
+package com.skypeak.hotel.dto.room;
 
 import com.skypeak.hotel.entity.enums.RoomType;
 

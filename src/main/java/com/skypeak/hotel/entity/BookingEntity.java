@@ -42,7 +42,6 @@ public class BookingEntity {
     @Column(name = "check_out_date", nullable = false)
     private LocalDate checkOutDate;
 
-    @Size(max = 30)
     @Enumerated(EnumType.STRING)
     @NotNull
     @Column(name = "status", nullable = false, length = 30)
