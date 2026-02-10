@@ -5,6 +5,7 @@ import com.skypeak.hotel.entity.enums.BookingStatus;
 import com.skypeak.hotel.repository.BookingRepository;
 import com.skypeak.hotel.repository.RoomRepository;
 import com.skypeak.hotel.repository.UserRepository;
+import com.skypeak.hotel.service.BalanceService;
 import com.skypeak.hotel.service.BookingService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -13,8 +14,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 /**
@@ -28,6 +31,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final BalanceService balanceService;
 
     @Override
     public BookingEntity createBooking(UUID userId, UUID roomId, LocalDate checkIn, LocalDate checkOut) {
@@ -52,6 +56,19 @@ public class BookingServiceImpl implements BookingService {
 
         if (bookingExists) throw new IllegalStateException("Room is already booked for the selected dates");
 
+        long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
+
+        BigDecimal totalCost = room.getPricePerNight().multiply(BigDecimal.valueOf(nights));
+
+        balanceService.withdraw(
+                userId,
+                totalCost,
+                "Payment for booking room " +
+                        room.getRoomNumber() + " from " +
+                        checkIn + " to " +
+                        checkOut
+        );
+
         BookingEntity booking = new BookingEntity();
         booking.setUser(user);
         booking.setRoom(room);
@@ -74,6 +91,19 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getStatus() == BookingStatus.CANCELLED) throw new IllegalStateException("Booking is already cancelled");
 
         if (booking.getStatus() == BookingStatus.COMPLETED) throw new IllegalStateException("Completed booking cannot be cancelled");
+
+        long nights = ChronoUnit.DAYS.between(booking.getCheckInDate(), booking.getCheckOutDate());
+
+        BigDecimal refund = booking.getRoom().getPricePerNight().multiply(BigDecimal.valueOf(nights));
+
+        balanceService.deposit(
+                userId,
+                refund,
+                "Refund for cancelled booking of room " +
+                        booking.getRoom().getRoomNumber() + " from " +
+                        booking.getCheckInDate() + " to " +
+                        booking.getCheckOutDate()
+        );
 
         booking.setStatus(BookingStatus.CANCELLED);
 

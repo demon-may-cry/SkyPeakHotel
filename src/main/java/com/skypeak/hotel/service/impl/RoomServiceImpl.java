@@ -26,7 +26,6 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public RoomEntity createRoom(CreateRoomRequest request) {
-//TODO: Could not commit JPA transaction
         if (roomRepository.existsByRoomNumber(request.getRoomNumber()))
             throw new IllegalStateException("Room with this number already exists");
         log.info("Creating room with number: {}", request.getRoomNumber());
