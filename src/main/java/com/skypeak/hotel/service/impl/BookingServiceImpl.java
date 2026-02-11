@@ -8,11 +8,11 @@ import com.skypeak.hotel.repository.UserRepository;
 import com.skypeak.hotel.service.BalanceService;
 import com.skypeak.hotel.service.BookingService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -111,6 +111,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<BookingEntity> getUserBookings(UUID userId, Pageable pageable) {
 
         if (!userRepository.existsById(userId)) throw new EntityNotFoundException("User not found");

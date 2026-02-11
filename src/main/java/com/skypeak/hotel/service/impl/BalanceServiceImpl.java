@@ -9,9 +9,11 @@ import com.skypeak.hotel.repository.UserBalanceRepository;
 import com.skypeak.hotel.repository.UserRepository;
 import com.skypeak.hotel.service.BalanceService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,6 +32,7 @@ public class BalanceServiceImpl implements BalanceService {
     private final BalanceTransactionRepository transactionRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public BigDecimal getBalance(UUID userId) {
         return balanceRepository.findByUser_Id(userId)
                 .map(UserBalanceEntity::getBalance)
@@ -73,6 +76,12 @@ public class BalanceServiceImpl implements BalanceService {
         balanceRepository.save(balance);
 
         saveTransaction(balance.getUser(), amount, TransactionType.WITHDRAW, description);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BalanceTransactionEntity> getTransactions(UUID userId, Pageable pageable) {
+        return transactionRepository.findByUser_Id(userId, pageable);
     }
 
     private void validateAmount(BigDecimal amount) {
