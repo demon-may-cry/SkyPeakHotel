@@ -87,7 +87,7 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         return buildError(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "Internal server error",
+                ex.getMessage(),
                 request.getRequestURI()
         );
     }
