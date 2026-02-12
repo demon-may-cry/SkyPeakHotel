@@ -8,6 +8,8 @@ import com.skypeak.hotel.service.RoomService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,12 @@ import java.util.UUID;
 public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<RoomEntity> getActiveRooms(Pageable pageable) {
+        return roomRepository.findByActiveTrue(pageable);
+    }
 
     @Override
     public RoomEntity createRoom(CreateRoomRequest request) {

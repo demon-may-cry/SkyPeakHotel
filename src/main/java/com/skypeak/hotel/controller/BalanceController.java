@@ -3,7 +3,7 @@ package com.skypeak.hotel.controller;
 import com.skypeak.hotel.dto.balance.BalanceResponse;
 import com.skypeak.hotel.dto.balance.DepositRequest;
 import com.skypeak.hotel.dto.balance.TransactionResponse;
-import com.skypeak.hotel.entity.BalanceTransactionEntity;
+import com.skypeak.hotel.mapper.BalanceTransactionMapper;
 import com.skypeak.hotel.security.CustomUserDetails;
 import com.skypeak.hotel.service.BalanceService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class BalanceController {
 
     private final BalanceService balanceService;
+    private final BalanceTransactionMapper transactionMapper;
 
     @GetMapping
     public BalanceResponse getBalance(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -43,17 +44,8 @@ public class BalanceController {
                                                      Pageable pageable) {
         return balanceService
                 .getTransactions(userDetails.getId(), pageable)
-                .map(this::toDto);
+                .map(transactionMapper::toDto);
     }
 
-    private TransactionResponse toDto(BalanceTransactionEntity tx) {
-        return new TransactionResponse(
-                tx.getId(),
-                tx.getAmount(),
-                tx.getType().name(),
-                tx.getDescription(),
-                tx.getCreatedAt()
-        );
-    }
 }
 

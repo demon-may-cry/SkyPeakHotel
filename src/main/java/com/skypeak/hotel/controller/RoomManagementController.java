@@ -3,7 +3,7 @@ package com.skypeak.hotel.controller;
 import com.skypeak.hotel.dto.room.CreateRoomRequest;
 import com.skypeak.hotel.dto.room.RoomResponse;
 import com.skypeak.hotel.dto.room.UpdateRoomRequest;
-import com.skypeak.hotel.entity.RoomEntity;
+import com.skypeak.hotel.mapper.RoomMapper;
 import com.skypeak.hotel.service.RoomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +22,14 @@ import java.util.UUID;
 public class RoomManagementController {
 
     private final RoomService roomService;
+    private final RoomMapper roomMapper;
 
     @PostMapping
     public RoomResponse createRoom(@RequestBody @Valid CreateRoomRequest request) {
 
         var room = roomService.createRoom(request);
 
-        return toDto(room);
+        return roomMapper.toDto(room);
     }
 
     @PutMapping("/{id}")
@@ -37,7 +38,7 @@ public class RoomManagementController {
 
         var room = roomService.updateRoom(id, request);
 
-        return toDto(room);
+        return roomMapper.toDto(room);
     }
 
     @PatchMapping("/{id}/deactivate")
@@ -45,14 +46,4 @@ public class RoomManagementController {
         roomService.deactivateRoom(id);
     }
 
-    private RoomResponse toDto(RoomEntity room) {
-        return new RoomResponse(
-                room.getId(),
-                room.getRoomNumber(),
-                room.getRoomType(),
-                room.getPricePerNight(),
-                room.isActive(),
-                room.getDescription()
-        );
-    }
 }

@@ -2,15 +2,14 @@ package com.skypeak.hotel.controller;
 
 import com.skypeak.hotel.dto.booking.BookingResponse;
 import com.skypeak.hotel.dto.booking.CreateBookingRequest;
-import com.skypeak.hotel.entity.BookingEntity;
-import com.skypeak.hotel.repository.UserRepository;
+import com.skypeak.hotel.mapper.BookingMapper;
+import com.skypeak.hotel.security.CustomUserDetails;
 import com.skypeak.hotel.service.BookingService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -24,57 +23,36 @@ import java.util.UUID;
 public class BookingController {
 
     private final BookingService bookingService;
-    private final UserRepository userRepository;
+    private final BookingMapper bookingMapper;
 
     @PostMapping
     public BookingResponse createBooking(@RequestBody @Valid CreateBookingRequest request,
-                                         Authentication authentication) {
-
-        String email = authentication.getName();
-
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
-
+                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
         var booking = bookingService.createBooking(
-                user.getId(),
+                userDetails.getId(),
                 request.getRoomId(),
                 request.getCheckIn(),
                 request.getCheckOut()
         );
 
-        return toDto(booking);
+        return bookingMapper.toDto(booking);
     }
 
     @GetMapping("/my")
-    public Page<BookingResponse> getMyBookings(Authentication authentication,
+    public Page<BookingResponse> getMyBookings(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                Pageable pageable) {
 
-        String email = authentication.getName();
-
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        return bookingService.getUserBookings(user.getId(), pageable).map(this::toDto);
+        return bookingService.getUserBookings(
+                userDetails.getId(),
+                pageable)
+                .map(bookingMapper::toDto);
     }
 
     @DeleteMapping("/{id}")
     public void cancelBooking(@PathVariable UUID id,
-                              Authentication authentication) {
+                              @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        String email = authentication.getName();
-
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        bookingService.cancelBooking(id, user.getId());
-    }
-
-    private BookingResponse toDto(BookingEntity booking) {
-        return new BookingResponse(
-                booking.getId(),
-                booking.getRoom().getId(),
-                booking.getCheckInDate(),
-                booking.getCheckOutDate(),
-                booking.getStatus(),
-                booking.getCreatedAt()
-        );
+        bookingService.cancelBooking(id, userDetails.getId());
     }
 
 }

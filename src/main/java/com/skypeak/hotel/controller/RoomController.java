@@ -1,8 +1,8 @@
 package com.skypeak.hotel.controller;
 
 import com.skypeak.hotel.dto.room.RoomResponse;
-import com.skypeak.hotel.entity.RoomEntity;
-import com.skypeak.hotel.repository.RoomRepository;
+import com.skypeak.hotel.mapper.RoomMapper;
+import com.skypeak.hotel.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,23 +18,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 public class RoomController {
 
-    private final RoomRepository roomRepository;
+    private final RoomService roomService;
+    private final RoomMapper roomMapper;
 
     @GetMapping()
     public Page<RoomResponse> getActiveRooms(Pageable pageable) {
-        return roomRepository.findByActiveTrue(pageable)
-                .map(this::toDto);
+        return roomService.getActiveRooms(pageable)
+                .map(roomMapper::toDto);
     }
 
-    private RoomResponse toDto(RoomEntity room) {
-        return new RoomResponse(
-                room.getId(),
-                room.getRoomNumber(),
-                room.getRoomType(),
-                room.getPricePerNight(),
-                room.isActive(),
-                room.getDescription()
-        );
-    }
 }
 
