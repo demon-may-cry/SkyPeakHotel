@@ -21,7 +21,7 @@ public class RoomController {
     private final RoomRepository roomRepository;
 
     @GetMapping()
-    private Page<RoomResponse> getActiveRooms(Pageable pageable) {
+    public Page<RoomResponse> getActiveRooms(Pageable pageable) {
         return roomRepository.findByActiveTrue(pageable)
                 .map(this::toDto);
     }

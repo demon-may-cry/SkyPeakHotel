@@ -2,7 +2,10 @@ package com.skypeak.hotel.controller;
 
 import com.skypeak.hotel.dto.auth.LoginRequest;
 import com.skypeak.hotel.dto.auth.LoginResponse;
+import com.skypeak.hotel.dto.auth.RegisterRequest;
+import com.skypeak.hotel.dto.auth.RegisterResponse;
 import com.skypeak.hotel.security.jwt.JwtService;
+import com.skypeak.hotel.service.RegistrationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +26,7 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final RegistrationService registrationService;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
@@ -39,5 +43,15 @@ public class AuthController {
         String jwt = jwtService.generateToken(request.getEmail(), role);
 
         return ResponseEntity.ok(new LoginResponse(jwt, "Bearer"));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<RegisterResponse> register(
+            @RequestBody @Valid RegisterRequest request
+            ) {
+        registrationService.register(request);
+        return ResponseEntity.ok(
+                new RegisterResponse("User registered successfully")
+        );
     }
 }

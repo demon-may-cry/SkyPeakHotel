@@ -35,11 +35,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/auth/login",
+                                "/auth/register",
                                 "/error",
                                 "/actuator/health").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex ->
-                        ex.authenticationEntryPoint(((request, response, authException) ->
+                        ex.authenticationEntryPoint(((_, response, authException) ->
                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage()))))
                 .sessionManagement(sm ->
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
