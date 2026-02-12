@@ -13,5 +13,7 @@ import org.mapstruct.Mapping;
 public interface BookingMapper {
 
     @Mapping(source = "room.id", target = "roomId")
+    @Mapping(source = "checkInDate", target = "checkIn")
+    @Mapping(source = "checkOutDate", target = "checkOut")
     BookingResponse toDto(BookingEntity booking);
 }
