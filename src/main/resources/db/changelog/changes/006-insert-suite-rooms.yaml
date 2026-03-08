@@ -1,0 +1,156 @@
+# Вставляем люкс номера в таблицу rooms
+databaseChangeLog:
+  - changeSet:
+      id: 6
+      author: Dmitriy_Eltsov
+
+      changes:
+#       Комната № 301 - Люкс
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "301"
+
+              - column:
+                  name: room_type
+                  value: SUITE
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "3000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Элегантный и просторный номер повышенного комфорта с отдельной зоной отдыха.
+                  Идеально подходит для гостей, ценящих роскошь, уют и высокий уровень сервиса.
+                  В номере предусмотрены все современные удобства для незабываемого пребывания."
+        
+#       Комната № 302 - Люкс
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "302"
+
+              - column:
+                  name: room_type
+                  value: SUITE
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "3000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Элегантный и просторный номер повышенного комфорта с отдельной зоной отдыха.
+                  Идеально подходит для гостей, ценящих роскошь, уют и высокий уровень сервиса.
+                  В номере предусмотрены все современные удобства для незабываемого пребывания."
+        
+#       Комната № 303 - Люкс
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "303"
+
+              - column:
+                  name: room_type
+                  value: SUITE
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "3000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Элегантный и просторный номер повышенного комфорта с отдельной зоной отдыха.
+                  Идеально подходит для гостей, ценящих роскошь, уют и высокий уровень сервиса.
+                  В номере предусмотрены все современные удобства для незабываемого пребывания."
+        
+#       Комната № 304 - Люкс
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "304"
+
+              - column:
+                  name: room_type
+                  value: SUITE
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "3000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Элегантный и просторный номер повышенного комфорта с отдельной зоной отдыха.
+                  Идеально подходит для гостей, ценящих роскошь, уют и высокий уровень сервиса.
+                  В номере предусмотрены все современные удобства для незабываемого пребывания."
+        
+#       Комната № 305 - Люкс
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "305"
+
+              - column:
+                  name: room_type
+                  value: SUITE
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "3000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Элегантный и просторный номер повышенного комфорта с отдельной зоной отдыха.
+                  Идеально подходит для гостей, ценящих роскошь, уют и высокий уровень сервиса.
+                  В номере предусмотрены все современные удобства для незабываемого пребывания."

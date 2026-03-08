@@ -1,0 +1,456 @@
+# Вставляем стандартные номера в таблицу rooms
+databaseChangeLog:
+  - changeSet:
+      id: 4
+      author: Dmitriy_Eltsov
+
+      changes:
+#       Комната № 101 - Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "101"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."
+
+#       Комната № 102 - Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "102"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."
+
+#       Комната № 103 - Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "103"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."
+
+#       Комната № 104 - Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "104"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."
+
+#       Комната № 105 - Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "105"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."
+
+#       Комната № 106 - Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "106"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."
+
+#       Комната № 107 - Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "107"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."
+
+#       Комната № 108 - Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "108"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."
+
+#       Комната № 109- Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "109"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."
+
+#       Комната № 110 - Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "110"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."
+
+#       Комната № 111 - Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "111"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."
+
+#       Комната № 112 - Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "112"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."
+
+#       Комната № 113 - Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "113"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."
+
+#       Комната № 114 - Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "114"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."
+
+#       Комната № 115 - Стандарт
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "115"
+
+              - column:
+                  name: room_type
+                  value: STANDARD
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "1000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Уютный номер для комфортного проживания одного или двух гостей.
+                  Оснащён удобной кроватью, рабочей зоной, Wi-Fi и всем необходимым для приятного отдыха.
+                  Идеальный выбор для деловой поездки или короткого путешествия."

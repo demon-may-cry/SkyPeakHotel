@@ -1,0 +1,316 @@
+# Вставляем апартаменты в таблицу rooms
+databaseChangeLog:
+  - changeSet:
+      id: 5
+      author: Dmitriy_Eltsov
+
+      changes:
+#       Комната № 201 - Апартаменты
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "201"
+
+              - column:
+                  name: room_type
+                  value: APARTMENTS
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "2000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Просторные апартаменты с отдельной гостиной зоной,
+                  идеально подходящие для длительного проживания и комфортного отдыха.
+                  В номере есть удобная спальня, зона отдыха и все современные удобства.
+                  Отличный выбор для гостей, ценящих пространство и уют."
+        
+#       Комната № 202 - Апартаменты
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "202"
+
+              - column:
+                  name: room_type
+                  value: APARTMENTS
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "2000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Просторные апартаменты с отдельной гостиной зоной,
+                  идеально подходящие для длительного проживания и комфортного отдыха.
+                  В номере есть удобная спальня, зона отдыха и все современные удобства.
+                  Отличный выбор для гостей, ценящих пространство и уют."
+        
+#       Комната № 203 - Апартаменты
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "203"
+
+              - column:
+                  name: room_type
+                  value: APARTMENTS
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "2000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Просторные апартаменты с отдельной гостиной зоной,
+                  идеально подходящие для длительного проживания и комфортного отдыха.
+                  В номере есть удобная спальня, зона отдыха и все современные удобства.
+                  Отличный выбор для гостей, ценящих пространство и уют."
+        
+#       Комната № 204 - Апартаменты
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "204"
+
+              - column:
+                  name: room_type
+                  value: APARTMENTS
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "2000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Просторные апартаменты с отдельной гостиной зоной,
+                  идеально подходящие для длительного проживания и комфортного отдыха.
+                  В номере есть удобная спальня, зона отдыха и все современные удобства.
+                  Отличный выбор для гостей, ценящих пространство и уют."
+        
+#       Комната № 205 - Апартаменты
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "205"
+
+              - column:
+                  name: room_type
+                  value: APARTMENTS
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "2000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Просторные апартаменты с отдельной гостиной зоной,
+                  идеально подходящие для длительного проживания и комфортного отдыха.
+                  В номере есть удобная спальня, зона отдыха и все современные удобства.
+                  Отличный выбор для гостей, ценящих пространство и уют."
+        
+#       Комната № 206 - Апартаменты
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "206"
+
+              - column:
+                  name: room_type
+                  value: APARTMENTS
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "2000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Просторные апартаменты с отдельной гостиной зоной,
+                  идеально подходящие для длительного проживания и комфортного отдыха.
+                  В номере есть удобная спальня, зона отдыха и все современные удобства.
+                  Отличный выбор для гостей, ценящих пространство и уют."
+        
+#       Комната № 207 - Апартаменты
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "207"
+
+              - column:
+                  name: room_type
+                  value: APARTMENTS
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "2000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Просторные апартаменты с отдельной гостиной зоной,
+                  идеально подходящие для длительного проживания и комфортного отдыха.
+                  В номере есть удобная спальня, зона отдыха и все современные удобства.
+                  Отличный выбор для гостей, ценящих пространство и уют."
+        
+#       Комната № 208 - Апартаменты
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "208"
+
+              - column:
+                  name: room_type
+                  value: APARTMENTS
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "2000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Просторные апартаменты с отдельной гостиной зоной,
+                  идеально подходящие для длительного проживания и комфортного отдыха.
+                  В номере есть удобная спальня, зона отдыха и все современные удобства.
+                  Отличный выбор для гостей, ценящих пространство и уют."
+        
+#       Комната № 209- Апартаменты
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "209"
+
+              - column:
+                  name: room_type
+                  value: APARTMENTS
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "2000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Просторные апартаменты с отдельной гостиной зоной,
+                  идеально подходящие для длительного проживания и комфортного отдыха.
+                  В номере есть удобная спальня, зона отдыха и все современные удобства.
+                  Отличный выбор для гостей, ценящих пространство и уют."
+        
+#       Комната № 210 - Апартаменты
+        - insert:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: room_number
+                  value: "210"
+
+              - column:
+                  name: room_type
+                  value: APARTMENTS
+
+              - column:
+                  name: price_per_night
+                  valueNumeric: "2000.00"
+
+              - column:
+                  name: active
+                  valueBoolean: "true"
+
+              - column:
+                  name: description
+                  value: "Просторные апартаменты с отдельной гостиной зоной,
+                  идеально подходящие для длительного проживания и комфортного отдыха.
+                  В номере есть удобная спальня, зона отдыха и все современные удобства.
+                  Отличный выбор для гостей, ценящих пространство и уют."
