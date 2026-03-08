@@ -4,7 +4,6 @@ import com.skypeak.hotel.entity.RoleEntity;
 import com.skypeak.hotel.entity.UserEntity;
 import com.skypeak.hotel.repository.RoleRepository;
 import com.skypeak.hotel.repository.UserRepository;
-import com.skypeak.hotel.security.SecurityConfig;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
