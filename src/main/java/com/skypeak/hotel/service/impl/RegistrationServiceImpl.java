@@ -3,6 +3,7 @@ package com.skypeak.hotel.service.impl;
 import com.skypeak.hotel.dto.auth.RegisterRequest;
 import com.skypeak.hotel.entity.UserBalanceEntity;
 import com.skypeak.hotel.entity.UserEntity;
+import com.skypeak.hotel.entity.enums.Status;
 import com.skypeak.hotel.repository.RoleRepository;
 import com.skypeak.hotel.repository.UserBalanceRepository;
 import com.skypeak.hotel.repository.UserRepository;
@@ -40,7 +41,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRoleEntity(role);
-        user.setStatus("ACTIVE");
+        user.setStatus(Status.ACTIVE);
 
         userRepository.save(user);
 

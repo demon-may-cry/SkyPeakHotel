@@ -3,6 +3,7 @@ package com.skypeak.hotel.service.impl;
 import com.skypeak.hotel.dto.user.ChangeRoleRequest;
 import com.skypeak.hotel.entity.UserEntity;
 import com.skypeak.hotel.entity.enums.Role;
+import com.skypeak.hotel.entity.enums.Status;
 import com.skypeak.hotel.repository.RoleRepository;
 import com.skypeak.hotel.repository.UserRepository;
 import com.skypeak.hotel.service.UserService;
@@ -71,10 +72,10 @@ public class UserServiceImpl implements UserService {
         if (user.getRoleEntity().getName().equals(Role.ADMIN.name()))
             throw new IllegalArgumentException("Administrator status cannot be changed");
 
-        if (user.getStatus().equals("INACTIVE"))
+        if (user.getStatus().equals(Status.INACTIVE))
             throw new IllegalArgumentException("User is already inactive");
 
-        user.setStatus("INACTIVE");
+        user.setStatus(Status.INACTIVE);
         log.info("User with ID: {} has been deactivated", userId);
 
     }

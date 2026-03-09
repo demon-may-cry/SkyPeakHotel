@@ -1,5 +1,6 @@
 package com.skypeak.hotel.entity;
 
+import com.skypeak.hotel.entity.enums.Status;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -33,10 +34,10 @@ public class UserEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Size(max = 50)
+    @Enumerated(EnumType.STRING)
     @NotNull
     @Column(name = "status", nullable = false, length = 50)
-    private String status;
+    private Status status;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
