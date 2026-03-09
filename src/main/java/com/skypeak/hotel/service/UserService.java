@@ -14,9 +14,11 @@ public interface UserService {
 
     Page<UserEntity> findAll(Pageable pageable);
 
-    UserEntity getUserById(UUID userId);
+    UserEntity getUserById(UUID id);
 
-    void changeUserRole(UUID userId, ChangeRoleRequest request);
+    void changeUserRole(UUID id, ChangeRoleRequest request);
 
-    void deactivateUser(UUID userId);
+    void deactivateUser(UUID id);
+
+    void activateUser(UUID id);
 }

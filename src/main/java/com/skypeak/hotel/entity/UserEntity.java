@@ -42,6 +42,6 @@ public class UserEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id", nullable = false)
-    private RoleEntity roleEntity;
+    private RoleEntity role;
 
 }

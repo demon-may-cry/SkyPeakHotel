@@ -14,16 +14,17 @@ import java.util.UUID;
  * @author Дмитрий Ельцов
  */
 public interface UserRepository extends JpaRepository<UserEntity, UUID> {
-    @EntityGraph(attributePaths = "roleEntity")
+
+    @EntityGraph(attributePaths = "role")
     Optional<UserEntity> findByEmail(String email);
 
     boolean existsByEmail(String email);
 
-    @EntityGraph(attributePaths = "roleEntity")
+    @EntityGraph(attributePaths = "role")
     @NonNull
     Page<UserEntity> findAll(@NonNull Pageable pageable);
 
-    @EntityGraph(attributePaths = "roleEntity")
+    @EntityGraph(attributePaths = "role")
     @NonNull
-    Optional<UserEntity> findById(UUID uuid);
+    Optional<UserEntity> findById(UUID id);
 }

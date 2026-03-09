@@ -40,7 +40,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         var user = new UserEntity();
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRoleEntity(role);
+        user.setRole(role);
         user.setStatus(Status.ACTIVE);
 
         userRepository.save(user);

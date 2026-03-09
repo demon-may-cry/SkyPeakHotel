@@ -27,56 +27,78 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public Page<UserEntity> findAll(Pageable pageable) {
-        log.info("Getting all users with pagination: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
+        log.info("Getting all users with pagination: page={}, size={}",
+                pageable.getPageNumber(),
+                pageable.getPageSize());
         return userRepository.findAll(pageable);
     }
 
     @Override
-    public UserEntity getUserById(UUID userId) {
-        log.info("Getting user by ID: {}", userId);
-        return userRepository.findById(userId).orElseThrow(() ->
-                new EntityNotFoundException("User not found with ID: " + userId));
+    @Transactional(readOnly = true)
+    public UserEntity getUserById(UUID id) {
+        log.info("Getting user by ID: {}", id);
+        return getUserOrThrow(id);
     }
 
     @Override
-    public void changeUserRole(UUID userId, ChangeRoleRequest request) {
-        log.info("Changing role for user ID: {} to {}", userId, request.role().name());
-        var user = userRepository.findById(userId).orElseThrow(() ->
-                new EntityNotFoundException("User not found with ID: " + userId));
+    public void changeUserRole(UUID id, ChangeRoleRequest request) {
+        log.info("Changing role for user ID: {} to {}",
+                id,
+                request.role());
+        var user = getUserOrThrow(id);
 
-        var currentRole = user.getRoleEntity().getName();
-        log.info("Current role for user ID: {} is {}", userId, currentRole);
+        var currentRole = Role.valueOf(user.getRole().getName());
+        log.info("Current role for user ID: {} is {}", id, currentRole);
 
-        if (currentRole.equals(Role.ADMIN.name()))
+        if (currentRole == Role.ADMIN)
             throw new IllegalArgumentException("Administrator role cannot be changed");
 
-        if (currentRole.equals(request.role().name()))
-            throw new IllegalArgumentException("User already has the role: " + request.role().name());
+        if (currentRole == request.role())
+            throw new IllegalArgumentException("User already has the role: " + request.role());
 
-        var roleEntity = roleRepository.findByName(request.role().name()).orElseThrow(() ->
-                new EntityNotFoundException("Role not found: " + request.role().name()));
+        var role = roleRepository.findByName(request.role().name()).orElseThrow(() ->
+                new EntityNotFoundException("Role not found: " + request.role()));
 
-        user.setRoleEntity(roleEntity);
+        user.setRole(role);
 
-        log.info("Role changed for user ID: {} to {}", userId, request.role().name());
-
+        log.info("Role changed for user ID: {} from {} to {}",
+                id,
+                currentRole,
+                request.role());
     }
 
     @Override
-    public void deactivateUser(UUID userId) {
-        log.info("Deactivating user with ID: {}", userId);
-        var user = userRepository.findById(userId).orElseThrow(() ->
-                new EntityNotFoundException("User not found with ID: " + userId));
+    public void deactivateUser(UUID id) {
+        log.info("Deactivating user with ID: {}", id);
+        var user = getUserOrThrow(id);
 
-        if (user.getRoleEntity().getName().equals(Role.ADMIN.name()))
+        if (user.getRole().getName().equals(Role.ADMIN.name()))
             throw new IllegalArgumentException("Administrator status cannot be changed");
 
-        if (user.getStatus().equals(Status.INACTIVE))
+        if (user.getStatus() == Status.INACTIVE)
             throw new IllegalArgumentException("User is already inactive");
 
         user.setStatus(Status.INACTIVE);
-        log.info("User with ID: {} has been deactivated", userId);
+        log.info("User with ID: {} has been deactivated", id);
 
+    }
+
+    @Override
+    public void activateUser(UUID id) {
+        log.info("Activating user with ID: {}", id);
+        var user = getUserOrThrow(id);
+
+        if (user.getStatus() == Status.ACTIVE)
+            throw new IllegalArgumentException("User is already active");
+
+        user.setStatus(Status.ACTIVE);
+        log.info("User with ID: {} has been activated", id);
+    }
+
+    private UserEntity getUserOrThrow(UUID id) {
+        return userRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException("User not found with ID: " + id));
     }
 }

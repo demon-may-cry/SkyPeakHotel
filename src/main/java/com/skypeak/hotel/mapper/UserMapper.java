@@ -12,6 +12,6 @@ import org.mapstruct.Mapping;
 @Mapper(config = CentralMapperConfig.class)
 public interface UserMapper {
 
-    @Mapping(source = "roleEntity.name", target = "role")
+    @Mapping(source = "role.name", target = "role")
     UserResponse toDto(UserEntity userEntity);
 }

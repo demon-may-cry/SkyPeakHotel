@@ -31,20 +31,24 @@ public class UserManagementController {
                 .map(userMapper::toDto);
     }
 
-    @GetMapping("/{userId}")
-    public UserResponse getUserById(@PathVariable UUID userId) {
-        return userMapper.toDto(userService.getUserById(userId));
+    @GetMapping("/{id}")
+    public UserResponse getUserById(@PathVariable UUID id) {
+        return userMapper.toDto(userService.getUserById(id));
     }
 
-    @PatchMapping("/{userId}/role")
-    public void changeUserRole(@PathVariable UUID userId,
-                               @RequestBody @Valid ChangeRoleRequest newRole) {
-        userService.changeUserRole(userId, newRole);
+    @PatchMapping("/{id}/role")
+    public void changeUserRole(@PathVariable UUID id,
+                               @RequestBody @Valid ChangeRoleRequest request) {
+        userService.changeUserRole(id, request);
     }
 
-    @DeleteMapping("/{userId}/deactivate")
-    public void deactivateUser(@PathVariable UUID userId) {
-        userService.deactivateUser(userId);
+    @PatchMapping("/{id}/deactivate")
+    public void deactivateUser(@PathVariable UUID id) {
+        userService.deactivateUser(id);
+    }
+
+    @PatchMapping("/{id}/activate")
+    public void activateUser(@PathVariable UUID id) {
+        userService.activateUser(id);
     }
 }
-
