@@ -1,10 +1,12 @@
 package com.skypeak.hotel.security;
 
 import com.skypeak.hotel.entity.UserEntity;
+import com.skypeak.hotel.entity.enums.Status;
 import lombok.Getter;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -20,14 +22,18 @@ public class CustomUserDetails implements UserDetails {
     private final UUID id;
     private final String email;
     private final String password;
+    private final Status status;
     private final List<GrantedAuthority> authorities;
 
     public CustomUserDetails(UserEntity user) {
         this.id = user.getId();
         this.email = user.getEmail();
         this.password = user.getPassword();
-        this.authorities = List.of(() -> "ROLE_" + user.getRoleEntity().getName());
+        this.status = user.getStatus();
+        this.authorities = List.of(
+                new SimpleGrantedAuthority("ROLE_" + user.getRoleEntity().getName()));
     }
+
     @Override
     @NullMarked
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -62,6 +68,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return status == Status.ACTIVE;
     }
 }
