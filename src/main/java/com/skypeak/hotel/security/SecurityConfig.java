@@ -40,7 +40,7 @@ public class SecurityConfig {
                                 "/actuator/health").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex ->
-                        ex.authenticationEntryPoint(((_, response, authException) ->
+                        ex.authenticationEntryPoint(((request, response, authException) ->
                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage()))))
                 .sessionManagement(sm ->
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
