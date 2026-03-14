@@ -1,6 +1,5 @@
 package com.skypeak.hotel.service.impl;
 
-import com.skypeak.hotel.dto.user.ChangeRoleRequest;
 import com.skypeak.hotel.entity.UserEntity;
 import com.skypeak.hotel.entity.enums.Role;
 import com.skypeak.hotel.entity.enums.Status;
@@ -43,10 +42,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void changeUserRole(UUID id, ChangeRoleRequest request) {
+    public void changeUserRole(UUID id, String request) {
         log.info("Changing role for user ID: {} to {}",
                 id,
-                request.role());
+                request);
         var user = getUserOrThrow(id);
 
         var currentRole = Role.valueOf(user.getRole().getName());
@@ -55,18 +54,18 @@ public class UserServiceImpl implements UserService {
         if (currentRole == Role.ADMIN)
             throw new IllegalArgumentException("Administrator role cannot be changed");
 
-        if (currentRole == request.role())
-            throw new IllegalArgumentException("User already has the role: " + request.role());
+        if (currentRole.name().equals(request))
+            throw new IllegalArgumentException("User already has the role: " + request);
 
-        var role = roleRepository.findByName(request.role().name()).orElseThrow(() ->
-                new EntityNotFoundException("Role not found: " + request.role()));
+        var role = roleRepository.findByName(request).orElseThrow(() ->
+                new EntityNotFoundException("Role not found: " + request));
 
         user.setRole(role);
 
         log.info("Role changed for user ID: {} from {} to {}",
                 id,
                 currentRole,
-                request.role());
+                request);
     }
 
     @Override

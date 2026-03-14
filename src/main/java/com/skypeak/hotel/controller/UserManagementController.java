@@ -39,7 +39,7 @@ public class UserManagementController {
     @PatchMapping("/{id}/role")
     public void changeUserRole(@PathVariable UUID id,
                                @RequestBody @Valid ChangeRoleRequest request) {
-        userService.changeUserRole(id, request);
+        userService.changeUserRole(id, request.role());
     }
 
     @PatchMapping("/{id}/deactivate")
