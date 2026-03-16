@@ -1,6 +1,7 @@
 package com.skypeak.hotel.service;
 
 import com.skypeak.hotel.entity.UserEntity;
+import com.skypeak.hotel.entity.enums.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,7 +16,7 @@ public interface UserService {
 
     UserEntity getUserById(UUID id);
 
-    void changeUserRole(UUID id, String request);
+    void changeUserRole(UUID id, Role request);
 
     void deactivateUser(UUID id);
 

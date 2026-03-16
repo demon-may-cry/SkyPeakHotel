@@ -42,30 +42,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void changeUserRole(UUID id, String request) {
+    public void changeUserRole(UUID id, Role request) {
         log.info("Changing role for user ID: {} to {}",
                 id,
-                request);
+                request.name());
         var user = getUserOrThrow(id);
 
-        var currentRole = Role.valueOf(user.getRole().getName());
+        var currentRole = user.getRole().getName();
         log.info("Current role for user ID: {} is {}", id, currentRole);
 
         if (currentRole == Role.ADMIN)
             throw new IllegalArgumentException("Administrator role cannot be changed");
 
-        if (currentRole.name().equals(request))
-            throw new IllegalArgumentException("User already has the role: " + request);
+        if (currentRole == request)
+            throw new IllegalArgumentException("User already has the role: " + request.name());
 
         var role = roleRepository.findByName(request).orElseThrow(() ->
-                new EntityNotFoundException("Role not found: " + request));
+                new EntityNotFoundException("Role not found: " + request.name()));
 
         user.setRole(role);
 
         log.info("Role changed for user ID: {} from {} to {}",
                 id,
                 currentRole,
-                request);
+                request.name());
     }
 
     @Override
@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
         log.info("Deactivating user with ID: {}", id);
         var user = getUserOrThrow(id);
 
-        if (user.getRole().getName().equals(Role.ADMIN.name()))
+        if (user.getRole().getName().equals(Role.ADMIN))
             throw new IllegalArgumentException("Administrator status cannot be changed");
 
         if (user.getStatus() == Status.INACTIVE)

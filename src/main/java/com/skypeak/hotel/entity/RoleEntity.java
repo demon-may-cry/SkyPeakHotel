@@ -1,5 +1,6 @@
 package com.skypeak.hotel.entity;
 
+import com.skypeak.hotel.entity.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,9 +22,9 @@ public class RoleEntity {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Size(max = 30)
+    @Enumerated(EnumType.STRING)
     @NotNull
     @Column(name = "name", nullable = false, length = 30, unique = true)
-    private String name;
+    private Role name;
 
 }

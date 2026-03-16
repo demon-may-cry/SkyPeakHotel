@@ -46,7 +46,7 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
-        var role = roleRepository.findByName(Role.ADMIN.name())
+        var role = roleRepository.findByName(Role.ADMIN)
                 .orElseThrow(() -> new IllegalStateException(Role.ADMIN.name() + " role not found"));
 
         UserEntity admin = new UserEntity();
@@ -62,10 +62,10 @@ public class DataInitializer implements CommandLineRunner {
 
     private void addRole() {
         for (Role role : Role.values()) {
-            roleRepository.findByName(role.name())
+            roleRepository.findByName(role)
                     .orElseGet(() -> {
                         var entity = new RoleEntity();
-                        entity.setName(role.name());
+                        entity.setName(role);
                         log.info("Adding role: {}", role.name());
                         return roleRepository.save(entity);
             });

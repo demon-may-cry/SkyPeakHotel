@@ -3,6 +3,7 @@ package com.skypeak.hotel.service.impl;
 import com.skypeak.hotel.dto.auth.RegisterRequest;
 import com.skypeak.hotel.entity.UserBalanceEntity;
 import com.skypeak.hotel.entity.UserEntity;
+import com.skypeak.hotel.entity.enums.Role;
 import com.skypeak.hotel.entity.enums.Status;
 import com.skypeak.hotel.repository.RoleRepository;
 import com.skypeak.hotel.repository.UserBalanceRepository;
@@ -39,7 +40,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             throw new IllegalStateException("User with this email already exists");
         log.info("Email {} is available for registration", request.getEmail());
 
-        var role = roleRepository.findByName("USER").orElseThrow(() ->
+        var role = roleRepository.findByName(Role.USER).orElseThrow(() ->
                 new IllegalStateException("Role USER not found"));
         log.warn("Role USER found for registration");
 
