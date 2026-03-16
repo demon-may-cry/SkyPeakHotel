@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -68,6 +69,18 @@ public class GlobalExceptionHandler {
             SecurityException ex,
             HttpServletRequest request) {
         log.error("Forbidden: {}", ex.getMessage());
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                ERROR_FORBIDDEN,
+                request.getRequestURI()
+        );
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(
+            AuthorizationDeniedException ex,
+            HttpServletRequest request) {
+        log.error("Access Denied: {}", ex.getMessage());
         return buildError(
                 HttpStatus.FORBIDDEN,
                 ERROR_FORBIDDEN,
