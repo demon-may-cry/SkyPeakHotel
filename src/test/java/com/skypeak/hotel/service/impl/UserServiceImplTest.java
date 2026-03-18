@@ -32,6 +32,7 @@ import static org.mockito.BDDMockito.*;
  * @author Дмитрий Ельцов
  */
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Тесты сервиса пользователей UserServiceImpl")
 class UserServiceTest {
 
     @Mock
@@ -60,7 +61,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("findAll returns paginated list of users")
+    @DisplayName("findAll должен возвращать пагинированный список пользователей")
     void findAll_ReturnsPaginatedUsers() {
         // Given
         List<UserEntity> users = IntStream.range(0, 10)
@@ -89,7 +90,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("getUserById return user when found")
+    @DisplayName("getUserById должен возвращать пользователя, если он найден")
     void getUserById_ReturnUser() {
         // Given
         UserEntity user = createUser("user@skypeak.com", "password", Role.USER, Status.ACTIVE);
@@ -109,7 +110,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("getUserById throw exception when user not found")
+    @DisplayName("getUserById должен выбрасывать исключение, если пользователь не найден")
     void getUserById_ReturnException_WhenNotFound() {
         // Given
         UUID id = UUID.randomUUID();
@@ -126,7 +127,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("changeUserRole update role when valid request")
+    @DisplayName("changeUserRole должен обновлять роль при валидном запросе")
     void changeUserRole_UpdateRole() {
         // Given
         UserEntity user = createUser("user@skypeak.com", "password", Role.USER, Status.ACTIVE);
@@ -146,7 +147,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("changeUserRole throw exception when user is admin")
+    @DisplayName("changeUserRole должен выбрасывать исключение, если пользователь - администратор")
     void changeUserRole_ReturnException_WhenRoleAdmin() {
         // Given
         UserEntity user = createUser("admin@skypeak.com", "password", Role.ADMIN, Status.ACTIVE);
@@ -163,7 +164,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("changeUserRole throw exception when user already has the role")
+    @DisplayName("changeUserRole должен выбрасывать исключение, если у пользователя уже есть эта роль")
     void changeUserRole_ReturnException_WhenSameRole() {
         // Given
         UserEntity user = createUser("user@skypeak.com", "password", Role.USER, Status.ACTIVE);
@@ -180,7 +181,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("changeUserRole throw exception when role not found")
+    @DisplayName("changeUserRole должен выбрасывать исключение, если роль не найдена")
     void changeUserRole_ReturnException_WhenRoleNotFound() {
         // Given
         UserEntity user = createUser("user@skypeak.com", "password", Role.USER, Status.ACTIVE);
@@ -198,7 +199,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("deactivateUser set status to INACTIVE")
+    @DisplayName("deactivateUser должен устанавливать статус INACTIVE")
     void deactivateUser_Deactivates() {
         // Given
         UserEntity user = createUser("user@skypeak.com", "password", Role.USER, Status.ACTIVE);
@@ -213,7 +214,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("deactivateUser throw exception when user is admin")
+    @DisplayName("deactivateUser должен выбрасывать исключение, если пользователь - администратор")
     void deactivateUser_ReturnException_WhenRoleAdmin() {
         // Given
         UserEntity user = createUser("admin@skypeak.com", "password", Role.ADMIN, Status.ACTIVE);
@@ -228,7 +229,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("deactivateUser throw exception when user is already inactive")
+    @DisplayName("deactivateUser должен выбрасывать исключение, если пользователь уже неактивен")
     void deactivateUser_ReturnException_WhenAlreadyInactive() {
         // Given
         UserEntity user = createUser("user@skypeak.com", "password", Role.USER, Status.INACTIVE);
@@ -243,7 +244,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("activateUser set status to ACTIVE")
+    @DisplayName("activateUser должен устанавливать статус ACTIVE")
     void activateUser_Activate() {
         // Given
         UserEntity user = createUser("user@skypeak.com", "password", Role.USER, Status.INACTIVE);
@@ -258,7 +259,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("activateUser throw exception when user is already active")
+    @DisplayName("activateUser должен выбрасывать исключение, если пользователь уже активен")
     void activateUser_ReturnException_WhenAlreadyActive() {
         // Given
         UserEntity user = createUser("user@skypeak.com", "password", Role.USER, Status.ACTIVE);
