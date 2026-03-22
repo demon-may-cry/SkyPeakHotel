@@ -10,6 +10,7 @@ import com.skypeak.hotel.repository.UserRepository;
 import com.skypeak.hotel.service.BalanceService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,13 +19,22 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.function.BiFunction;
+
+import static java.text.MessageFormat.format;
 
 /**
+ * Реализация сервиса {@link BalanceService} для управления балансом пользователей.
+ * <p>
+ * Обеспечивает выполнение транзакционных операций пополнения, списания
+ * и получения информации о счетах и транзакциях.
+ *
  * @author Дмитрий Ельцов
  */
 @RequiredArgsConstructor
 @Service
 @Transactional
+@Slf4j
 public class BalanceServiceImpl implements BalanceService {
 
     private final UserRepository userRepository;
@@ -34,6 +44,7 @@ public class BalanceServiceImpl implements BalanceService {
     @Override
     @Transactional(readOnly = true)
     public BigDecimal getBalance(UUID userId) {
+        log.info("▶️ Запрос на получение баланса для пользователя {}", userId);
         return balanceRepository.findByUser_Id(userId)
                 .map(UserBalanceEntity::getBalance)
                 .orElse(BigDecimal.ZERO);
@@ -41,57 +52,64 @@ public class BalanceServiceImpl implements BalanceService {
 
     @Override
     public void deposit(UUID userId, BigDecimal amount, String description) {
-
-        validateAmount(amount);
-
-        var user = userRepository.findById(userId).orElseThrow(() ->
-                new EntityNotFoundException("User not found"));
-
-        var balance = balanceRepository.findByUser_Id(userId)
-                .orElseGet(() -> createEmptyBalance(user));
-
-        balance.setBalance(balance.getBalance().add(amount));
-        balance.setUpdatedAt(LocalDateTime.now());
-
-        balanceRepository.save(balance);
-
-        saveTransaction(user, amount, TransactionType.DEPOSIT, description);
+        log.info("▶️ Запрос на пополнение баланса для пользователя {} на сумму {}. Описание: {}",
+                userId, amount, description);
+        updateBalance(userId, amount, description, TransactionType.DEPOSIT, BigDecimal::add);
     }
 
     @Override
     public void withdraw(UUID userId, BigDecimal amount, String description) {
-
-        validateAmount(amount);
-
-        var balance = balanceRepository.findByUser_Id(userId)
-                .orElseThrow(() -> new IllegalStateException("Balance not found for user"));
-
-        if (balance.getBalance().compareTo(amount) < 0) {
-            throw new IllegalStateException("Insufficient balance");
-        }
-
-        balance.setBalance(balance.getBalance().subtract(amount));
-        balance.setUpdatedAt(LocalDateTime.now());
-
-        balanceRepository.save(balance);
-
-        saveTransaction(balance.getUser(), amount, TransactionType.WITHDRAW, description);
+        log.info("▶️ Запрос на списание с баланса пользователя {} на сумму {}. Описание: {}",
+                userId, amount, description);
+        updateBalance(userId, amount, description, TransactionType.WITHDRAW, BigDecimal::subtract);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<BalanceTransactionEntity> getTransactions(UUID userId, Pageable pageable) {
+        log.info("▶️ Запрос на получение истории транзакций для пользователя {}. Параметры: {}", userId, pageable);
         return transactionRepository.findByUser_Id(userId, pageable);
     }
 
+    private void updateBalance(UUID userId,
+                               BigDecimal amount,
+                               String description,
+                               TransactionType type,
+                               BiFunction<BigDecimal, BigDecimal, BigDecimal> operation) {
+        validateAmount(amount);
+
+        UserEntity user = userRepository.findById(userId).orElseThrow(() ->
+                new EntityNotFoundException(format("Пользователь с ID {0} не найден.", userId)));
+
+        UserBalanceEntity balance = balanceRepository.findByUser_Id(userId)
+                .orElseGet(() -> createEmptyBalance(user));
+
+        if (type == TransactionType.WITHDRAW && balance.getBalance().compareTo(amount) < 0) {
+            log.error("🚫 Недостаточно средств для списания у пользователя {}. Требуется: {}, доступно: {}",
+                    userId, amount, balance.getBalance());
+            throw new IllegalStateException("Недостаточно средств на счете.");
+        }
+
+        balance.setBalance(operation.apply(balance.getBalance(), amount));
+        balance.setUpdatedAt(LocalDateTime.now());
+
+        balanceRepository.save(balance);
+        log.info("✅ Баланс пользователя {} обновлен. Новый баланс: {}", userId, balance.getBalance());
+
+        saveTransaction(user, amount, type, description);
+    }
+
     private void validateAmount(BigDecimal amount) {
+        log.info("  🔎 Проверка суммы: {}", amount);
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be positive");
+            log.error("🚫 Сумма для операции должна быть положительной. Получено: {}", amount);
+            throw new IllegalArgumentException("Сумма должна быть положительным числом.");
         }
     }
 
     private UserBalanceEntity createEmptyBalance(UserEntity user) {
-        UserBalanceEntity balance = new UserBalanceEntity();
+        log.info("  ➕ Создание нового пустого баланса для пользователя {}", user.getId());
+        var balance = new UserBalanceEntity();
         balance.setUser(user);
         balance.setBalance(BigDecimal.ZERO);
         balance.setUpdatedAt(LocalDateTime.now());
@@ -102,7 +120,8 @@ public class BalanceServiceImpl implements BalanceService {
                                  BigDecimal amount,
                                  TransactionType type,
                                  String description) {
-        BalanceTransactionEntity tx = new BalanceTransactionEntity();
+        log.info("  ➕ Сохранение транзакции: тип={}, сумма={}, описание='{}'", type, amount, description);
+        var tx = new BalanceTransactionEntity();
         tx.setUser(user);
         tx.setAmount(amount);
         tx.setType(type);
@@ -110,5 +129,6 @@ public class BalanceServiceImpl implements BalanceService {
         tx.setCreatedAt(LocalDateTime.now());
 
         transactionRepository.save(tx);
+        log.info("✅ Транзакция для пользователя {} успешно сохранена", user.getId());
     }
 }
