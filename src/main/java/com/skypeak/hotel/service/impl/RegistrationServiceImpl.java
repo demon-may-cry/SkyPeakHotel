@@ -19,6 +19,18 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
+ * Реализация {@link RegistrationService} для регистрации новых пользователей.
+ * <p>
+ * Этот сервис выполняет следующие операции в рамках одной транзакции:
+ * <ol>
+ *     <li>Проверяет, не занят ли указанный email.</li>
+ *     <li>Находит роль "USER" в системе.</li>
+ *     <li>Создает и сохраняет новую сущность {@link UserEntity} с зашифрованным паролем.</li>
+ *     <li>Создает и сохраняет начальный нулевой баланс {@link UserBalanceEntity} для нового пользователя.</li>
+ * </ol>
+ * В случае ошибки (например, если email уже существует или роль "USER" не найдена),
+ * транзакция откатывается, и в базе данных не остается никаких изменений.
+ *
  * @author Дмитрий Ельцов
  */
 @RequiredArgsConstructor
@@ -32,39 +44,49 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final PasswordEncoder passwordEncoder;
     private final UserBalanceRepository balanceRepository;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void register(RegisterRequest request) {
-        log.info("Registering new user with email: {}", request.getEmail());
+        log.info("▶️ Начинаем регистрацию нового пользователя с email: {}", request.getEmail());
 
-        if (userRepository.existsByEmail(request.getEmail()))
-            throw new IllegalStateException("User with this email already exists");
-        log.info("Email {} is available for registration", request.getEmail());
+        if (userRepository.existsByEmail(request.getEmail())) {
+            log.error("🚫 Пользователь с email {} уже существует", request.getEmail());
+            throw new IllegalStateException("Пользователь с таким email уже существует");
+        }
+        log.info("✅ Email {} свободен для регистрации", request.getEmail());
 
-        var role = roleRepository.findByName(Role.USER).orElseThrow(() ->
-                new IllegalStateException("Role USER not found"));
-        log.warn("Role USER found for registration");
+        var role = roleRepository.findByName(Role.USER).orElseThrow(() -> {
+            log.error("🚫 Системная роль 'USER' не найдена в базе данных!");
+            return new IllegalStateException("Роль 'USER' не найдена. Регистрация невозможна.");
+        });
+        log.info("✅ Роль 'USER' найдена");
 
         var user = new UserEntity();
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(role);
         user.setStatus(Status.ACTIVE);
-        log.info("Creating user entity: {}, {}, {}",
+        log.info("  ➕ Создаем сущность пользователя: email={}, роль={}, статус={}",
                 user.getEmail(),
                 user.getRole().getName(),
                 user.getStatus());
 
         userRepository.save(user);
-        log.info("User {} registered successfully", user.getEmail());
+        log.info("✅ Пользователь {} успешно сохранен в базе данных", user.getEmail());
 
         var balance = new UserBalanceEntity();
         balance.setUser(user);
         balance.setBalance(BigDecimal.ZERO);
         balance.setUpdatedAt(LocalDateTime.now());
+        log.info("  ➕ Создаем начальный баланс для пользователя {}", user.getEmail());
 
         balanceRepository.save(balance);
-        log.info("Initial balance created for user {} with amount {}",
+        log.info("✅ Начальный баланс для {} успешно создан. Сумма: {}",
                 user.getEmail(),
                 balance.getBalance());
+        
+        log.info("🎉 Пользователь {} полностью зарегистрирован!", user.getEmail());
     }
 }
