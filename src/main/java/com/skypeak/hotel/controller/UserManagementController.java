@@ -44,7 +44,7 @@ public class UserManagementController {
     @GetMapping
     public Page<UserResponse> getAllUsers(Pageable pageable) {
         log.info("▶️ Получен запрос на получение списка пользователей. Параметры пагинации: {}", pageable);
-        var users = userService.findAll(pageable).map(userMapper::toDto);
+        Page<UserResponse> users = userService.findAll(pageable).map(userMapper::toDto);
         log.info("✅ Успешно возвращен список из {} пользователей на странице {}",
                 users.getNumberOfElements(),
                 users.getNumber());
@@ -61,7 +61,7 @@ public class UserManagementController {
     @GetMapping("/{id}")
     public UserResponse getUserById(@PathVariable UUID id) {
         log.info("▶️ Получен запрос на получение пользователя по ID: {}", id);
-        var user = userMapper.toDto(userService.getUserById(id));
+        UserResponse user = userMapper.toDto(userService.getUserById(id));
         log.info("✅ Успешно возвращен пользователь с email: {}", user.email());
         return user;
     }
