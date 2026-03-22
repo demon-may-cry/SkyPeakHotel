@@ -1,4 +1,4 @@
-package com.skypeak.hotel.service;
+package com.skypeak.hotel.service.impl;
 
 import com.skypeak.hotel.dto.user.ChangeRoleRequest;
 import com.skypeak.hotel.entity.RoleEntity;
@@ -7,7 +7,6 @@ import com.skypeak.hotel.entity.enums.Role;
 import com.skypeak.hotel.entity.enums.Status;
 import com.skypeak.hotel.repository.RoleRepository;
 import com.skypeak.hotel.repository.UserRepository;
-import com.skypeak.hotel.service.impl.UserServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +32,7 @@ import static org.mockito.BDDMockito.*;
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Тесты сервиса пользователей UserServiceImpl")
-class UserServiceTest {
+class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
@@ -44,14 +43,22 @@ class UserServiceTest {
     @InjectMocks
     private UserServiceImpl userService;
 
+    private static ChangeRoleRequest getChangeRoleRequestManager() {
+        return new ChangeRoleRequest(Role.MANAGER);
+    }
+
+    private static ChangeRoleRequest getChangeRoleRequestUser() {
+        return new ChangeRoleRequest(Role.USER);
+    }
+
     private RoleEntity createRole(Role roleName) {
-        RoleEntity role = new RoleEntity();
+        var role = new RoleEntity();
         role.setName(roleName);
         return role;
     }
 
     private UserEntity createUser(String email, String password, Role roleName, Status status) {
-        UserEntity user = new UserEntity();
+        var user = new UserEntity();
         user.setId(UUID.randomUUID());
         user.setEmail(email);
         user.setPassword(password);
@@ -90,7 +97,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("getUserById должен возвращать пользователя, если он найден")
+    @DisplayName("getUserById должен возвращать пользователя по id, если он найден")
     void getUserById_ReturnUser() {
         // Given
         UserEntity user = createUser("user@skypeak.com", "password", Role.USER, Status.ACTIVE);
@@ -132,7 +139,7 @@ class UserServiceTest {
         // Given
         UserEntity user = createUser("user@skypeak.com", "password", Role.USER, Status.ACTIVE);
 
-        ChangeRoleRequest request = new ChangeRoleRequest(Role.MANAGER);
+        ChangeRoleRequest request = getChangeRoleRequestManager();
 
         // When
         given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
@@ -147,12 +154,12 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("changeUserRole должен выбрасывать исключение, если пользователь - администратор")
+    @DisplayName("changeUserRole должен выбрасывать исключение, если пользователь c ролью ADMIN")
     void changeUserRole_ReturnException_WhenRoleAdmin() {
         // Given
         UserEntity user = createUser("admin@skypeak.com", "password", Role.ADMIN, Status.ACTIVE);
 
-        ChangeRoleRequest request = new ChangeRoleRequest(Role.MANAGER);
+        ChangeRoleRequest request = getChangeRoleRequestManager();
 
         // When
         given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
@@ -169,7 +176,7 @@ class UserServiceTest {
         // Given
         UserEntity user = createUser("user@skypeak.com", "password", Role.USER, Status.ACTIVE);
 
-        ChangeRoleRequest request = new ChangeRoleRequest(Role.USER);
+        ChangeRoleRequest request = getChangeRoleRequestUser();
 
         // When
         given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
@@ -186,7 +193,7 @@ class UserServiceTest {
         // Given
         UserEntity user = createUser("user@skypeak.com", "password", Role.USER, Status.ACTIVE);
 
-        ChangeRoleRequest request = new ChangeRoleRequest(Role.MANAGER);
+        ChangeRoleRequest request = getChangeRoleRequestManager();
 
         // When
         given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
@@ -214,7 +221,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("deactivateUser должен выбрасывать исключение, если пользователь - администратор")
+    @DisplayName("deactivateUser должен выбрасывать исключение, если пользователь с ролью ADMIN")
     void deactivateUser_ReturnException_WhenRoleAdmin() {
         // Given
         UserEntity user = createUser("admin@skypeak.com", "password", Role.ADMIN, Status.ACTIVE);

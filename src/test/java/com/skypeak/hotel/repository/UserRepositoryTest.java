@@ -9,6 +9,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -18,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
+@DisplayName("Тесты репозитория UserRepository")
 class UserRepositoryTest {
 
     @Autowired
@@ -28,7 +30,7 @@ class UserRepositoryTest {
 
     private void createUser(String email, String password, Role role, Status status) {
 
-        UserEntity user = new UserTestBuilder(entityManager)
+        var user = new UserTestBuilder(entityManager)
                 .email(email)
                 .password(password)
                 .role(TestFixtures.getOrCreateRole(entityManager, role))
@@ -39,8 +41,8 @@ class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("findByEmail returns user when exists")
-    void findByEmail_ReturnsUser_WhenExists() {
+    @DisplayName("findByEmail - находит пользователя, если он существует")
+    void findByEmail_returnsUser_whenExists() {
         // Given
         createUser("user@skypeak.com", "password", Role.USER, Status.ACTIVE);
 
@@ -55,8 +57,8 @@ class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("existsByEmail returns true when user exists")
-    void existsByEmail_ReturnsTrue_WhenExists() {
+    @DisplayName("existsByEmail - возвращает true, если пользователь существует")
+    void existsByEmail_returnsTrue_whenExists() {
         // Given
         createUser("user@skypeak.com", "password", Role.USER, Status.ACTIVE);
 
@@ -70,8 +72,8 @@ class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("findAll returns users with roles")
-    void findAll_ReturnsUsersWithRoles() {
+    @DisplayName("findAll - возвращает всех пользователей с их ролями")
+    void findAll_returnsUsersWithRoles() {
         // Given
         createUser("user1@skypeak.com", "password1", Role.USER, Status.ACTIVE);
         createUser("admin@skypeak.com", "password2", Role.ADMIN, Status.ACTIVE);
@@ -80,7 +82,7 @@ class UserRepositoryTest {
         createUser("userBlocked@skypeak.com", "password5", Role.USER, Status.BLOCKED);
 
         // When
-        var result = userRepository.findAll(PageRequest.of(0, 10));
+        Page<UserEntity> result = userRepository.findAll(PageRequest.of(0, 10));
 
         // Then
         assertThat(result).isNotEmpty();
@@ -90,10 +92,10 @@ class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("findById returns user with role")
-    void findById_ReturnsUserWithRole_WhenExists() {
+    @DisplayName("findById - находит пользователя с его ролью, если он существует")
+    void findById_returnsUserWithRole_whenExists() {
         // Given
-        UserEntity user = new UserTestBuilder(entityManager)
+        var user = new UserTestBuilder(entityManager)
                 .email("user@skypeak.com")
                 .password("password")
                 .role(TestFixtures.getOrCreateRole(entityManager, Role.USER))

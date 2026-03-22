@@ -1,15 +1,17 @@
 package com.skypeak.hotel.controller;
 
+import com.skypeak.hotel.dto.user.ChangeRoleRequest;
 import com.skypeak.hotel.dto.user.UserResponse;
 import com.skypeak.hotel.entity.RoleEntity;
 import com.skypeak.hotel.entity.UserEntity;
 import com.skypeak.hotel.entity.enums.Role;
 import com.skypeak.hotel.entity.enums.Status;
 import com.skypeak.hotel.mapper.UserMapper;
-import com.skypeak.hotel.service.UserService;
 import com.skypeak.hotel.security.jwt.JwtAuthenticationFilter;
+import com.skypeak.hotel.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -19,29 +21,33 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * @author Дмитрий Ельцов
  */
 @WebMvcTest(UserManagementController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@DisplayName("Тесты контроллера управления пользователями UserManagementController")
 public class UserManagementControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockitoBean
     private UserService userService;
@@ -52,14 +58,18 @@ public class UserManagementControllerTest {
     @MockitoBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    private ChangeRoleRequest changeRoleRequest(Role role) {
+        return new ChangeRoleRequest(role);
+    }
+
     private RoleEntity createRole() {
-        RoleEntity role = new RoleEntity();
+        var role = new RoleEntity();
         role.setName(Role.USER);
         return role;
     }
 
     private UserEntity createUser(String email, String password) {
-        UserEntity user = new UserEntity();
+        var user = new UserEntity();
         user.setId(UUID.randomUUID());
         user.setEmail(email);
         user.setPassword(password);
@@ -69,8 +79,8 @@ public class UserManagementControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/management/users returns paginated users")
-    void getAllUsers_ReturnPaginatedUsers() throws Exception {
+    @DisplayName("GET /users - возвращает пагинированный список пользователей")
+    void getAllUsers_returnsPaginatedUsers() throws Exception {
         // Given
         List<UserEntity> users = IntStream.range(0, 10)
                 .mapToObj(i -> createUser(
@@ -93,7 +103,7 @@ public class UserManagementControllerTest {
                 });
 
         // When
-        mockMvc.perform(get("/api/management/users")
+        mockMvc.perform(get("/api/v1/management/users")
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
@@ -111,12 +121,12 @@ public class UserManagementControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/management/users/{id} returns user by ID")
-    void getUserById_ReturnsUser_WhenExists() throws Exception {
+    @DisplayName("GET /users/{id} - возвращает пользователя по ID")
+    void getUserById_returnsUser_whenExists() throws Exception {
         // Given
         UserEntity user = createUser("user@skypeak.com", "password");
 
-        UserResponse response = new UserResponse(
+        var response = new UserResponse(
                 user.getId(),
                 "user@skypeak.com",
                 Status.ACTIVE.name(),
@@ -127,7 +137,7 @@ public class UserManagementControllerTest {
         given(userMapper.toDto(any(UserEntity.class))).willReturn(response);
 
         // When
-        mockMvc.perform(get("/api/management/users/{id}", user.getId()))
+        mockMvc.perform(get("/api/v1/management/users/{id}", user.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("user@skypeak.com"))
                 .andExpect(jsonPath("$.status").value(Status.ACTIVE.name()))
@@ -139,14 +149,14 @@ public class UserManagementControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/management/users/{id} returns 404 when user not found")
-    void getUserById_Returns404_WhenNotFound() throws Exception {
+    @DisplayName("GET /users/{id} - возвращает 404, если пользователь не найден")
+    void getUserById_returnsNotFound_whenUserDoesNotExist() throws Exception {
         // Given
         given(userService.getUserById(any(UUID.class)))
                 .willThrow(new EntityNotFoundException("User not found"));
 
         // When
-        mockMvc.perform(get("/api/management/users/{id}", UUID.randomUUID()))
+        mockMvc.perform(get("/api/v1/management/users/{id}", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
 
         // Then
@@ -154,19 +164,15 @@ public class UserManagementControllerTest {
     }
 
     @Test
-    @DisplayName("PATCH /api/management/users/{id}/role changes user role")
-    void changeUserRole_ChangesRole() throws Exception {
+    @DisplayName("PATCH /users/{id}/role - успешно изменяет роль пользователя")
+    void changeUserRole_changesRole_whenRequestIsValid() throws Exception {
         // Given
         UUID id = UUID.randomUUID();
 
         // When
-        mockMvc.perform(patch("/api/management/users/{id}/role", id)
+        mockMvc.perform(patch("/api/v1/management/users/{id}/role", id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                    "role": "MANAGER"
-                                }
-                                """))
+                        .content(objectMapper.writeValueAsString(changeRoleRequest(Role.MANAGER))))
                 .andExpect(status().isOk());
 
         // Then
@@ -174,19 +180,20 @@ public class UserManagementControllerTest {
     }
 
     @Test
-    @DisplayName("PATCH /api/management/users/{id}/role returns 400 for invalid role")
-    void changeUserRole_ReturnsBadRequest_ForInvalidRole() throws Exception {
+    @DisplayName("PATCH /users/{id}/role - возвращает 400 для невалидной роли")
+    void changeUserRole_returnsBadRequest_forInvalidRole() throws Exception {
         // Given
         UUID id = UUID.randomUUID();
+        String invalidRoleJson = """
+                {
+                    "role" : "INVALID_ROLE"
+                }
+                """;
 
-        // When
-        mockMvc.perform(patch("/api/management/users/{id}/role", id)
+        // When & Then
+        mockMvc.perform(patch("/api/v1/management/users/{id}/role", id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                    "role": "INVALID"
-                                }
-                                """))
+                        .content(invalidRoleJson))
                 .andExpect(status().isBadRequest());
 
         // Then
@@ -194,30 +201,30 @@ public class UserManagementControllerTest {
     }
 
     @Test
-    @DisplayName("PATCH /api/management/users/{id}/role returns 404 when user not found")
-    void changeUserRole_ReturnsNotFound() throws Exception {
+    @DisplayName("PATCH /users/{id}/role - возвращает 404, если пользователь не найден")
+    void changeUserRole_returnsNotFound_whenUserDoesNotExist() throws Exception {
         // Given
         UUID id = UUID.randomUUID();
 
         doThrow(new EntityNotFoundException("User not found"))
-                .when(userService).changeUserRole(id, Role.MANAGER);
+                .when(userService).changeUserRole(any(UUID.class), any(Role.class));
 
         // When
-        mockMvc.perform(patch("/api/management/users/{id}/role", id)
+        mockMvc.perform(patch("/api/v1/management/users/{id}/role", id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"role\": \"MANAGER\"}"))
+                        .content(objectMapper.writeValueAsString(changeRoleRequest(Role.USER))))
                 .andExpect(status().isNotFound());
 
     }
 
     @Test
-    @DisplayName("PATCH /api/management/users/{id}/deactivate deactivates user")
-    void deactivateUser_Deactivates() throws Exception {
+    @DisplayName("PATCH /users/{id}/deactivate - успешно деактивирует пользователя")
+    void deactivateUser_deactivatesUser_whenRequestIsValid() throws Exception {
         // Given
         UUID id = UUID.randomUUID();
 
         // When
-        mockMvc.perform(patch("/api/management/users/{id}/deactivate", id))
+        mockMvc.perform(patch("/api/v1/management/users/{id}/deactivate", id))
                 .andExpect(status().isOk());
 
         // Then
@@ -225,13 +232,13 @@ public class UserManagementControllerTest {
     }
 
     @Test
-    @DisplayName("PATCH /api/management/users/{id}/activate activates user")
-    void activateUser_Activate() throws Exception {
+    @DisplayName("PATCH /users/{id}/activate - успешно активирует пользователя")
+    void activateUser_activatesUser_whenRequestIsValid() throws Exception {
         // Given
         UUID id = UUID.randomUUID();
 
         // When
-        mockMvc.perform(patch("/api/management/users/{id}/activate", id))
+        mockMvc.perform(patch("/api/v1/management/users/{id}/activate", id))
                 .andExpect(status().isOk());
 
         // Then

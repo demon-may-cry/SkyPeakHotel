@@ -43,7 +43,7 @@ public class UserTestBuilder {
 
     public UserEntity build() {
 
-        UserEntity user = new UserEntity();
+        var user = new UserEntity();
         user.setEmail(email);
         user.setPassword(password);
         user.setRole(role);
