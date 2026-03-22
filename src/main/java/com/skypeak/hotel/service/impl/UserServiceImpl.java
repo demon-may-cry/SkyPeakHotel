@@ -1,5 +1,6 @@
 package com.skypeak.hotel.service.impl;
 
+import com.skypeak.hotel.entity.RoleEntity;
 import com.skypeak.hotel.entity.UserEntity;
 import com.skypeak.hotel.entity.enums.Role;
 import com.skypeak.hotel.entity.enums.Status;
@@ -16,6 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Реализация сервиса {@link UserService} для управления пользователями.
+ * <p>
+ * Предоставляет бизнес-логику для поиска, изменения ролей и статусов пользователей.
+ * Все операции, изменяющие данные, выполняются в транзакциях.
+ *
+ * @author Дмитрий Ельцов
+ * @see UserRepository
+ * @see RoleRepository
+ */
 @RequiredArgsConstructor
 @Service
 @Transactional
@@ -25,79 +36,110 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<UserEntity> findAll(Pageable pageable) {
-        log.info("Getting all users with pagination: page={}, size={}",
+        log.info("▶️ Запрос на получение всех пользователей: страница={}, размер={}",
                 pageable.getPageNumber(),
                 pageable.getPageSize());
         return userRepository.findAll(pageable);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public UserEntity getUserById(UUID id) {
-        log.info("Getting user by ID: {}", id);
+        log.info("▶️ Запрос на получение пользователя по ID: {}", id);
         return getUserOrThrow(id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void changeUserRole(UUID id, Role request) {
-        log.info("Changing role for user ID: {} to {}",
-                id,
-                request.name());
-        var user = getUserOrThrow(id);
+    public void changeUserRole(UUID id, Role role) {
+        log.info("▶️ Запрос на изменение роли для пользователя {}. Новая роль: {}", id, role);
+        UserEntity user = getUserOrThrow(id);
 
-        var currentRole = user.getRole().getName();
-        log.info("Current role for user ID: {} is {}", id, currentRole);
+        Role currentRole = user.getRole().getName();
+        log.info("Текущая роль пользователя {}: {}", id, currentRole);
 
-        if (currentRole == Role.ADMIN)
-            throw new IllegalArgumentException("Administrator role cannot be changed");
+        if (currentRole == Role.ADMIN) {
+            log.error("🚫 Попытка изменить роль администратора {}", id);
+            throw new IllegalArgumentException("Роль администратора не может быть изменена.");
+        }
 
-        if (currentRole == request)
-            throw new IllegalArgumentException("User already has the role: " + request.name());
+        if (currentRole == role) {
+            log.warn("⚠️ Пользователь {} уже имеет роль {}", id, role);
+            throw new IllegalArgumentException("Пользователь уже имеет роль: " + role.name());
+        }
 
-        var role = roleRepository.findByName(request).orElseThrow(() ->
-                new EntityNotFoundException("Role not found: " + request.name()));
+        RoleEntity roleEntity = roleRepository.findByName(role).orElseThrow(() -> {
+            log.error("🚫 Системная роль '{}' не найдена в базе данных!", role);
+            return new EntityNotFoundException("Роль не найдена: " + role.name());
+        });
 
-        user.setRole(role);
-
-        log.info("Role changed for user ID: {} from {} to {}",
-                id,
-                currentRole,
-                request.name());
+        user.setRole(roleEntity);
+        log.info("✅ Роль для пользователя {} успешно изменена с {} на {}", id, currentRole, role);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deactivateUser(UUID id) {
-        log.info("Deactivating user with ID: {}", id);
-        var user = getUserOrThrow(id);
+        log.info("▶️ Запрос на деактивацию пользователя: {}", id);
+        UserEntity user = getUserOrThrow(id);
 
-        if (user.getRole().getName().equals(Role.ADMIN))
-            throw new IllegalArgumentException("Administrator status cannot be changed");
+        if (user.getRole().getName().equals(Role.ADMIN)) {
+            log.error("🚫 Попытка деактивировать администратора {}", id);
+            throw new IllegalArgumentException("Статус администратора не может быть изменен.");
+        }
 
-        if (user.getStatus() == Status.INACTIVE)
-            throw new IllegalArgumentException("User is already inactive");
+        if (user.getStatus() == Status.INACTIVE) {
+            log.warn("⚠️ Пользователь {} уже деактивирован", id);
+            throw new IllegalArgumentException("Пользователь уже неактивен.");
+        }
 
         user.setStatus(Status.INACTIVE);
-        log.info("User with ID: {} has been deactivated", id);
-
+        log.info("✅ Пользователь {} успешно деактивирован", id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void activateUser(UUID id) {
-        log.info("Activating user with ID: {}", id);
-        var user = getUserOrThrow(id);
+        log.info("▶️ Запрос на активацию пользователя: {}", id);
+        UserEntity user = getUserOrThrow(id);
 
-        if (user.getStatus() == Status.ACTIVE)
-            throw new IllegalArgumentException("User is already active");
+        if (user.getStatus() == Status.ACTIVE) {
+            log.warn("⚠️ Пользователь {} уже активен", id);
+            throw new IllegalArgumentException("Пользователь уже активен.");
+        }
 
         user.setStatus(Status.ACTIVE);
-        log.info("User with ID: {} has been activated", id);
+        log.info("✅ Пользователь {} успешно активирован", id);
     }
 
+    /**
+     * Вспомогательный метод для поиска пользователя по ID.
+     * Выбрасывает исключение, если пользователь не найден.
+     *
+     * @param id UUID пользователя.
+     * @return Найденный {@link UserEntity}.
+     * @throws EntityNotFoundException если пользователь с указанным ID не существует.
+     */
     private UserEntity getUserOrThrow(UUID id) {
-        return userRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("User not found with ID: " + id));
+        log.info("  🔎 Поиск пользователя по ID: {}", id);
+        return userRepository.findById(id).orElseThrow(() -> {
+            log.error("🚫 Пользователь с ID {} не найден", id);
+            return new EntityNotFoundException("Пользователь с ID " + id + " не найден.");
+        });
     }
 }
