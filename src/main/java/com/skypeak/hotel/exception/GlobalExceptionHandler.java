@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,6 +29,7 @@ public class GlobalExceptionHandler {
     private static final String ERROR_CONFLICT = "CONFLICT";
     private static final String ERROR_FORBIDDEN = "FORBIDDEN";
     private static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
+    private static final String ERROR_UNAUTHORIZED = "Неверный логин или пароль";
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(
@@ -61,6 +63,18 @@ public class GlobalExceptionHandler {
         return buildError(
                 HttpStatus.CONFLICT,
                 ERROR_CONFLICT,
+                request.getRequestURI()
+        );
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorized(
+            BadCredentialsException ex,
+            HttpServletRequest request) {
+        log.error(ex.getMessage());
+        return buildError(
+                HttpStatus.UNAUTHORIZED,
+                ERROR_UNAUTHORIZED,
                 request.getRequestURI()
         );
     }
