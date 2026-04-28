@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,14 +41,14 @@ public class BalanceController {
      * Возвращает текущий баланс аутентифицированного пользователя.
      *
      * @param userDetails данные аутентифицированного пользователя.
-     * @return {@link BalanceResponse} с суммой на счету.
+     * @return {@link ResponseEntity} с {@link BalanceResponse} и статусом 200 OK.
      */
     @GetMapping
-    public BalanceResponse getBalance(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<BalanceResponse> getBalance(@AuthenticationPrincipal CustomUserDetails userDetails) {
         log.info("▶️ Запрос на получение баланса для пользователя: {}", userDetails.getUsername());
         BigDecimal balance = balanceService.getBalance(userDetails.getId());
         log.info("✅ Успешно возвращен баланс для пользователя {}: {}", userDetails.getUsername(), balance);
-        return new BalanceResponse(balance);
+        return ResponseEntity.ok(new BalanceResponse(balance));
     }
 
     /**
