@@ -24,18 +24,18 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    private static final String ERROR_NOT_FOUND = "NOT_FOUND";
-    private static final String ERROR_BAD_REQUEST = "BAD_REQUEST";
-    private static final String ERROR_CONFLICT = "CONFLICT";
-    private static final String ERROR_FORBIDDEN = "FORBIDDEN";
-    private static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
+    private static final String ERROR_NOT_FOUND = "Объект не найден";
+    private static final String ERROR_BAD_REQUEST = "Ошибочный запрос";
+    private static final String ERROR_CONFLICT = "Конфликт";
+    private static final String ERROR_FORBIDDEN = "Запрещено";
+    private static final String INTERNAL_SERVER_ERROR = "Внутренняя ошибка сервера";
     private static final String ERROR_UNAUTHORIZED = "Неверный логин или пароль";
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(
             EntityNotFoundException ex,
             HttpServletRequest request) {
-        log.error("Entity not found: {}", ex.getMessage());
+        log.error("Объект не найден: {}", ex.getMessage());
         return buildError(
                 HttpStatus.NOT_FOUND,
                 ERROR_NOT_FOUND,
@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBadRequest(
             IllegalArgumentException ex,
             HttpServletRequest request) {
-        log.error("Bad request: {}", ex.getMessage());
+        log.error("Ошибочный запрос: {}", ex.getMessage());
         return buildError(
                 HttpStatus.BAD_REQUEST,
                 ERROR_BAD_REQUEST,
@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleConflict(
             IllegalStateException ex,
             HttpServletRequest request) {
-        log.error("Conflict: {}", ex.getMessage());
+        log.error("Конфликт: {}", ex.getMessage());
         return buildError(
                 HttpStatus.CONFLICT,
                 ERROR_CONFLICT,
@@ -71,7 +71,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUnauthorized(
             BadCredentialsException ex,
             HttpServletRequest request) {
-        log.error(ex.getMessage());
+        log.error("Неавторизованный: {}", ex.getMessage());
         return buildError(
                 HttpStatus.UNAUTHORIZED,
                 ERROR_UNAUTHORIZED,
@@ -83,7 +83,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleForbidden(
             SecurityException ex,
             HttpServletRequest request) {
-        log.error("Forbidden: {}", ex.getMessage());
+        log.error("Запрещено: {}", ex.getMessage());
         return buildError(
                 HttpStatus.FORBIDDEN,
                 ERROR_FORBIDDEN,
@@ -95,7 +95,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAccessDenied(
             AuthorizationDeniedException ex,
             HttpServletRequest request) {
-        log.error("Access Denied: {}", ex.getMessage());
+        log.error("Доступ запрещен: {}", ex.getMessage());
         return buildError(
                 HttpStatus.FORBIDDEN,
                 ERROR_FORBIDDEN,
@@ -114,7 +114,7 @@ public class GlobalExceptionHandler {
                 .map(FieldError::getDefaultMessage)
                 .collect(Collectors.joining(", "));
 
-        log.error("Validation error: {}", message);
+        log.error("Ошибка проверки: {}", message);
         return buildError(
                 HttpStatus.BAD_REQUEST,
                 ERROR_BAD_REQUEST,
@@ -126,7 +126,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleInvalidFormat(
             HttpMessageNotReadableException ex,
             HttpServletRequest request) {
-        log.error("Invalid request format: {}", ex.getMessage());
+        log.error("Недопустимый формат запроса: {}", ex.getMessage());
         return buildError(
                 HttpStatus.BAD_REQUEST,
                 ERROR_BAD_REQUEST,
@@ -137,7 +137,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAny(
             Exception ex,
             HttpServletRequest request) {
-        log.error("Unexpected error: ", ex);
+        log.error("Непредвиденная ошибка: ", ex);
         return buildError(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 INTERNAL_SERVER_ERROR,
