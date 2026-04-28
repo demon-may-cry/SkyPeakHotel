@@ -30,7 +30,7 @@ class UserRepositoryTest {
 
     private void createUser(String email, String password, Role role, Status status) {
 
-        var user = new UserTestBuilder(entityManager)
+        UserEntity user = new UserTestBuilder(entityManager)
                 .email(email)
                 .password(password)
                 .role(TestFixtures.getOrCreateRole(entityManager, role))
@@ -95,7 +95,7 @@ class UserRepositoryTest {
     @DisplayName("findById - находит пользователя с его ролью, если он существует")
     void findById_returnsUserWithRole_whenExists() {
         // Given
-        var user = new UserTestBuilder(entityManager)
+        UserEntity user = new UserTestBuilder(entityManager)
                 .email("user@skypeak.com")
                 .password("password")
                 .role(TestFixtures.getOrCreateRole(entityManager, Role.USER))
