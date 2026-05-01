@@ -15,10 +15,7 @@ package com.skypeak.hotel.entity.enums;
  * @see com.skypeak.hotel.entity.UserEntity
  */
 public enum Status {
-    /** Активный пользователь - полная функциональность доступна */
     ACTIVE,
-    /** Неактивный аккаунт - требуется активация, авторизация запрещена */
     INACTIVE,
-    /** Заблокирован администратором - полное ограничение доступа до разблокировки */
     BLOCKED
 }
