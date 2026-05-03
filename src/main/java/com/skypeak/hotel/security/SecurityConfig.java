@@ -37,7 +37,10 @@ public class SecurityConfig {
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/register",
                                 "/error",
-                                "/actuator/health").permitAll()
+                                "/actuator/health",
+                                "/swagger/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex ->
                         ex.authenticationEntryPoint(((request, response, authException) ->
