@@ -7,11 +7,38 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 /**
+ * Маппер для преобразования между BookingEntity и BookingResponse DTO.
+ * <p>
+ * Отвечает за конвертацию полей сущности бронирования в Data Transfer Object
+ * для передачи клиентам через REST API. Использует MapStruct для автоматической
+ * генерации реализации.
+ * </p>
+ *
+ * <h3>Особенности маппинга:</h3>
+ * <ul>
+ *   <li>Поле {@code roomId} маппится из {@code room.id} сущности</li>
+ *   <li>Поле {@code checkIn} маппится из {@code checkInDate} сущности</li>
+ *   <li>Поле {@code checkOut} маппится из {@code checkOutDate} сущности</li>
+ *   <li>Использует центральную конфигурацию {@link CentralMapperConfig}</li>
+ * </ul>
+ *
  * @author Дмитрий Ельцов
+ * @see BookingEntity
+ * @see BookingResponse
+ * @see CentralMapperConfig
  */
 @Mapper(config = CentralMapperConfig.class)
 public interface BookingMapper {
 
+    /**
+     * Преобразует сущность бронирования в DTO для передачи клиенту.
+     * <p>
+     * Маппит все поля сущности, включая вложенные поля комнаты и дат.
+     * </p>
+     *
+     * @param booking сущность бронирования из базы данных
+     * @return DTO бронирования для отправки клиенту
+     */
     @Mapping(source = "room.id", target = "roomId")
     @Mapping(source = "checkInDate", target = "checkIn")
     @Mapping(source = "checkOutDate", target = "checkOut")
