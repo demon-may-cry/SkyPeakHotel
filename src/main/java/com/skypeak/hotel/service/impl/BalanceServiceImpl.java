@@ -131,4 +131,20 @@ public class BalanceServiceImpl implements BalanceService {
         transactionRepository.save(tx);
         log.info("✅ Транзакция для пользователя {} успешно сохранена", user.getId());
     }
+
+    @Override
+    public BigDecimal calculateNewBalance(BigDecimal currentBalance, BalanceTransactionEntity transaction) {
+        log.info("▶️ Расчет нового баланса. Текущий баланс: {}. Тип транзакции: {}, сумма: {}",
+                currentBalance, transaction.getType(), transaction.getAmount());
+
+        BigDecimal newBalance;
+        if (transaction.getType() == TransactionType.DEPOSIT) {
+            newBalance = currentBalance.add(transaction.getAmount());
+        } else {
+            newBalance = currentBalance.subtract(transaction.getAmount());
+        }
+
+        log.info("✅ Новый баланс рассчитан: {}", newBalance);
+        return newBalance;
+    }
 }

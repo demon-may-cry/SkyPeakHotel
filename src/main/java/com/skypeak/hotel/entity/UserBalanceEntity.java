@@ -134,15 +134,4 @@ public class UserBalanceEntity {
     public String getFormattedBalance() {
         return balance + " ₽";
     }
-
-    /**
-     * Вычисляет новый баланс после применения транзакции.
-     *
-     * @param transaction транзакция для применения
-     * @return новый баланс после применения транзакции
-     */
-    @SuppressWarnings("unused")
-    public BigDecimal calculateNewBalance(BalanceTransactionEntity transaction) {
-        return balance.add(transaction.getAmount().multiply(BigDecimal.valueOf(transaction.getSign())));
-    }
 }

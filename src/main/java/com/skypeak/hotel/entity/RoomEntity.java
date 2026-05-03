@@ -140,17 +140,6 @@ public class RoomEntity {
     }
 
     /**
-     * Рассчитывает стоимость проживания за указанный период.
-     *
-     * @param days количество дней
-     * @return общая стоимость за указанный период
-     */
-    @SuppressWarnings("unused")
-    public BigDecimal calculatePriceForDays(int days) {
-        return pricePerNight.multiply(BigDecimal.valueOf(days));
-    }
-
-    /**
      * Возвращает цену в формате строки с символом валюты.
      *
      * @return форматированная цена

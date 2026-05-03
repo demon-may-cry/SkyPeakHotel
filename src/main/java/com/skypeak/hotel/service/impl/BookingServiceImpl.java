@@ -7,6 +7,7 @@ import com.skypeak.hotel.repository.RoomRepository;
 import com.skypeak.hotel.repository.UserRepository;
 import com.skypeak.hotel.service.BalanceService;
 import com.skypeak.hotel.service.BookingService;
+import com.skypeak.hotel.service.RoomService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,6 +33,7 @@ public class BookingServiceImpl implements BookingService {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final BalanceService balanceService;
+    private final RoomService roomService;
 
     @Override
     public BookingEntity createBooking(UUID userId, UUID roomId, LocalDate checkIn, LocalDate checkOut) {
@@ -57,8 +59,7 @@ public class BookingServiceImpl implements BookingService {
         if (bookingExists) throw new IllegalStateException("Room is already booked for the selected dates");
 
         long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
-
-        BigDecimal totalCost = room.getPricePerNight().multiply(BigDecimal.valueOf(nights));
+        BigDecimal totalCost = roomService.calculatePriceForDays(room, (int) nights);
 
         balanceService.withdraw(
                 userId,
@@ -93,8 +94,7 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getStatus() == BookingStatus.COMPLETED) throw new IllegalStateException("Completed booking cannot be cancelled");
 
         long nights = ChronoUnit.DAYS.between(booking.getCheckInDate(), booking.getCheckOutDate());
-
-        BigDecimal refund = booking.getRoom().getPricePerNight().multiply(BigDecimal.valueOf(nights));
+        BigDecimal refund = roomService.calculatePriceForDays(booking.getRoom(), (int) nights);
 
         balanceService.deposit(
                 userId,

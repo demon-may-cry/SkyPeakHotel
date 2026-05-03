@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -161,19 +160,6 @@ public class BookingEntity {
     @SuppressWarnings("unused")
     public boolean canBeCancelledByUser() {
         return isCreated() && checkInDate.isAfter(LocalDate.now());
-    }
-
-    /**
-     * Рассчитывает общую стоимость бронирования.
-     *
-     * @return общая стоимость за весь период пребывания
-     */
-    @SuppressWarnings("unused")
-    public java.math.BigDecimal calculateTotalPrice() {
-        if (room == null) {
-            return BigDecimal.ZERO;
-        }
-        return room.getPricePerNight().multiply(BigDecimal.valueOf(getDuration()));
     }
 
 }

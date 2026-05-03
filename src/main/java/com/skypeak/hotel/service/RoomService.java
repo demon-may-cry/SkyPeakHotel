@@ -6,6 +6,7 @@ import com.skypeak.hotel.entity.RoomEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
@@ -20,4 +21,13 @@ public interface RoomService {
     RoomEntity updateRoom(UUID roomId, UpdateRoomRequest request);
 
     void deactivateRoom(UUID roomId);
+
+    /**
+     * Рассчитывает стоимость проживания в комнате за указанное количество дней.
+     *
+     * @param room  сущность комнаты с ценой за ночь
+     * @param days  количество дней проживания
+     * @return общая стоимость за указанный период
+     */
+    BigDecimal calculatePriceForDays(RoomEntity room, int days);
 }

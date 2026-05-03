@@ -49,12 +49,21 @@ public interface BalanceService {
      */
     void withdraw(UUID userId, BigDecimal amount, String description);
 
-    /**
-     * Возвращает пагинированную историю транзакций пользователя.
-     *
-     * @param userId   UUID пользователя.
-     * @param pageable параметры пагинации.
-     * @return {@link Page} с {@link BalanceTransactionEntity}.
-     */
-    Page<BalanceTransactionEntity> getTransactions(UUID userId, Pageable pageable);
+/**
+ * Возвращает пагинированную историю транзакций пользователя.
+ *
+ * @param userId   UUID пользователя.
+ * @param pageable параметры пагинации.
+ * @return {@link Page} с {@link BalanceTransactionEntity}.
+ */
+Page<BalanceTransactionEntity> getTransactions(UUID userId, Pageable pageable);
+
+/**
+ * Рассчитывает новый баланс после применения транзакции.
+ *
+ * @param currentBalance текущий баланс пользователя
+ * @param transaction    транзакция для применения
+ * @return новый баланс после применения транзакции
+ */
+BigDecimal calculateNewBalance(BigDecimal currentBalance, BalanceTransactionEntity transaction);
 }
