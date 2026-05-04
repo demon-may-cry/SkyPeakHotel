@@ -3,6 +3,7 @@ package com.skypeak.hotel.mapper;
 import com.skypeak.hotel.dto.balance.TransactionResponse;
 import com.skypeak.hotel.entity.BalanceTransactionEntity;
 import com.skypeak.hotel.mapper.config.CentralMapperConfig;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -37,6 +38,14 @@ public interface BalanceTransactionMapper {
      * @param entity сущность транзакции баланса из базы данных
      * @return DTO транзакции для отправки клиенту
      */
+    @BeanMapping(ignoreUnmappedSourceProperties = {
+            "deposit",
+            "withdraw",
+            "sign",
+            "formattedDescription",
+            "displayAmount",
+            "user"
+    })
     @Mapping(source = "type", target = "type")
     TransactionResponse toDto(BalanceTransactionEntity entity);
 }

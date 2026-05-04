@@ -3,6 +3,7 @@ package com.skypeak.hotel.mapper;
 import com.skypeak.hotel.dto.user.UserResponse;
 import com.skypeak.hotel.entity.UserEntity;
 import com.skypeak.hotel.mapper.config.CentralMapperConfig;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -37,6 +38,14 @@ public interface UserMapper {
      * @param userEntity сущность пользователя из базы данных
      * @return DTO пользователя для отправки клиенту
      */
+    @BeanMapping(ignoreUnmappedSourceProperties = {
+            "admin",
+            "manager",
+            "user",
+            "active",
+            "blocked",
+            "password"
+    })
     @Mapping(source = "role.name", target = "role")
     UserResponse toDto(UserEntity userEntity);
 }

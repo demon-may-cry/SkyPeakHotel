@@ -3,6 +3,7 @@ package com.skypeak.hotel.mapper;
 import com.skypeak.hotel.dto.booking.BookingResponse;
 import com.skypeak.hotel.entity.BookingEntity;
 import com.skypeak.hotel.mapper.config.CentralMapperConfig;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -39,6 +40,14 @@ public interface BookingMapper {
      * @param booking сущность бронирования из базы данных
      * @return DTO бронирования для отправки клиенту
      */
+    @BeanMapping(ignoreUnmappedSourceProperties = {
+            "created",
+            "cancelled",
+            "completed",
+            "active",
+            "duration",
+            "user"
+    })
     @Mapping(source = "room.id", target = "roomId")
     @Mapping(source = "checkInDate", target = "checkIn")
     @Mapping(source = "checkOutDate", target = "checkOut")

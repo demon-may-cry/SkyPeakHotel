@@ -3,6 +3,7 @@ package com.skypeak.hotel.mapper;
 import com.skypeak.hotel.dto.room.RoomResponse;
 import com.skypeak.hotel.entity.RoomEntity;
 import com.skypeak.hotel.mapper.config.CentralMapperConfig;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 
 /**
@@ -36,5 +37,15 @@ public interface RoomMapper {
      * @param room сущность комнаты из базы данных
      * @return DTO комнаты для отправки клиенту
      */
+    @BeanMapping(ignoreUnmappedSourceProperties = {
+            "available",
+            "roomTypeDescription",
+            "displayName",
+            "fullDescription",
+            "formattedPrice",
+            "standard",
+            "apartments",
+            "suite"
+    })
     RoomResponse toDto(RoomEntity room);
 }
