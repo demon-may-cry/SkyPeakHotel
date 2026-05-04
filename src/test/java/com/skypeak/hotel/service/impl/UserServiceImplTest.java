@@ -128,7 +128,7 @@ class UserServiceImplTest {
         // Then
         assertThatThrownBy(() -> userService.getUserById(id))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("User not found with ID: " + id);
+                .hasMessageContaining("Пользователь с ID " + id + " не найден.");
 
         then(userRepository).should().findById(id);
     }
@@ -167,7 +167,7 @@ class UserServiceImplTest {
         // Then
         assertThatThrownBy(() -> userService.changeUserRole(user.getId(), request.role()))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Administrator role cannot be changed");
+                .hasMessageContaining("Роль администратора не может быть изменена.");
     }
 
     @Test
@@ -184,7 +184,7 @@ class UserServiceImplTest {
         // Then
         assertThatThrownBy(() -> userService.changeUserRole(user.getId(), request.role()))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("User already has the role: " + request.role());
+                .hasMessageContaining("Пользователь уже имеет роль: " + request.role());
     }
 
     @Test
@@ -202,7 +202,7 @@ class UserServiceImplTest {
         // Then
         assertThatThrownBy(() -> userService.changeUserRole(user.getId(), request.role()))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("Role not found: " + request.role());
+                .hasMessageContaining("Роль не найдена: " + request.role());
     }
 
     @Test
@@ -232,7 +232,7 @@ class UserServiceImplTest {
         // Then
         assertThatThrownBy(() -> userService.deactivateUser(user.getId()))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Administrator status cannot be changed");
+                .hasMessageContaining("Статус администратора не может быть изменен.");
     }
 
     @Test
@@ -247,7 +247,7 @@ class UserServiceImplTest {
         // Then
         assertThatThrownBy(() -> userService.deactivateUser(user.getId()))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("User is already inactive");
+                .hasMessageContaining("Пользователь уже неактивен.");
     }
 
     @Test
@@ -277,6 +277,6 @@ class UserServiceImplTest {
         // Then
         assertThatThrownBy(() -> userService.activateUser(user.getId()))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("User is already active");
+                .hasMessageContaining("Пользователь уже активен.");
     }
 }
