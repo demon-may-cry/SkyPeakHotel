@@ -111,18 +111,48 @@ git clone <repository-url>
 cd hotel
 ```
 
-2. **Запустите весь стек через Docker Compose**
+2. **Настройте переменные окружения**
 ```bash
-docker-compose up -d
+# Скопируйте пример файла
+cp .env.example .env
+
+# Отредактируйте .env файл с вашими настройками
+nano .env
+```
+
+3. **Запустите весь стек через Docker Compose**
+```bash
+# Вариант 1: С выводом логов (для разработки)
+./docker-run.sh up
+
+# Вариант 2: В фоне (для продакшена)
+./docker-run.sh up-d
 ```
 
 Это запустит:
 - PostgreSQL на `localhost:5432`
 - Spring Boot API на `localhost:8080`
+- Swagger UI на `http://localhost:8080/swagger`
 
-3. **Проверьте статус**
+4. **Проверьте статус**
 ```bash
-docker-compose ps
+./docker-run.sh logs
+```
+
+5. **Остановка**
+```bash
+./docker-run.sh down
+```
+
+### Доступные команды Docker
+
+```bash
+./docker-run.sh up        # Запуск с логами
+./docker-run.sh up-d      # Запуск в фоне
+./docker-run.sh down      # Остановка
+./docker-run.sh logs      # Просмотр логов
+./docker-run.sh restart   # Перезапуск
+./docker-run.sh clean     # Полная очистка
 ```
 
 ### Ручной запуск
@@ -271,8 +301,13 @@ hotel/
 │   │       ├── application.properties
 │   │       └── db/changelog/        # Liquibase миграции
 │   └── test/                        # Тесты
+├── Dockerfile                       # Docker образ приложения
+├── .dockerignore                    # Исключения для Docker
+├── docker-run.sh                    # Скрипт управления Docker
+├── .env.example                     # Пример переменных окружения
 ├── pom.xml                          # Maven конфигурация
-└── README.md                        # Этот файл
+├── README.md                        # Этот файл
+└── .gitignore                       # Исключения Git
 ```
 
 ## 👨‍💻 От автора
