@@ -30,6 +30,7 @@ import static java.text.MessageFormat.format;
  * и получения информации о счетах и транзакциях.
  *
  * @author Дмитрий Ельцов
+ * @see BalanceService
  */
 @RequiredArgsConstructor
 @Service
@@ -41,6 +42,9 @@ public class BalanceServiceImpl implements BalanceService {
     private final UserBalanceRepository balanceRepository;
     private final BalanceTransactionRepository transactionRepository;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public BigDecimal getBalance(UUID userId) {
@@ -50,6 +54,9 @@ public class BalanceServiceImpl implements BalanceService {
                 .orElse(BigDecimal.ZERO);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deposit(UUID userId, BigDecimal amount, String description) {
         log.info("▶️ Запрос на пополнение баланса для пользователя {} на сумму {}. Описание: {}",
@@ -57,6 +64,9 @@ public class BalanceServiceImpl implements BalanceService {
         updateBalance(userId, amount, description, TransactionType.DEPOSIT, BigDecimal::add);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void withdraw(UUID userId, BigDecimal amount, String description) {
         log.info("▶️ Запрос на списание с баланса пользователя {} на сумму {}. Описание: {}",
@@ -64,6 +74,9 @@ public class BalanceServiceImpl implements BalanceService {
         updateBalance(userId, amount, description, TransactionType.WITHDRAW, BigDecimal::subtract);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<BalanceTransactionEntity> getTransactions(UUID userId, Pageable pageable) {
@@ -132,6 +145,9 @@ public class BalanceServiceImpl implements BalanceService {
         log.info("✅ Транзакция для пользователя {} успешно сохранена", user.getId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BigDecimal calculateNewBalance(BigDecimal currentBalance, BalanceTransactionEntity transaction) {
         log.info("▶️ Расчет нового баланса. Текущий баланс: {}. Тип транзакции: {}, сумма: {}",

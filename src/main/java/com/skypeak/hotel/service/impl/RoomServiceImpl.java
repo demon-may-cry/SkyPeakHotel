@@ -17,7 +17,14 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
+ * Реализация сервиса для управления номерами отеля.
+ * <p>
+ * Обеспечивает операции с номерами: получение активных номеров, создание,
+ * обновление и деактивацию номеров. Включает помощник для расчета стоимости.
+ * </p>
+ *
  * @author Дмитрий Ельцов
+ * @see RoomService
  */
 @RequiredArgsConstructor
 @Service
@@ -27,17 +34,31 @@ public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<RoomEntity> getActiveRooms(Pageable pageable) {
-        return roomRepository.findByActiveTrue(pageable);
+        log.info("▶️ Запрос на получение активных номеров. Pageable: {}", pageable);
+        Page<RoomEntity> activeRooms = roomRepository.findByActiveTrue(pageable);
+        log.info("✅ Активные номера получены. Количество: {}, Всего страниц: {}",
+                activeRooms.getNumberOfElements(), activeRooms.getTotalPages());
+        return activeRooms;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public RoomEntity createRoom(CreateRoomRequest request) {
-        if (roomRepository.existsByRoomNumber(request.getRoomNumber()))
-            throw new IllegalStateException("Room with this number already exists");
-        log.info("Creating room with number: {}", request.getRoomNumber());
+        log.info("▶️ Запрос на создание номера. Номер: {}, Тип: {}, Цена: {}",
+                request.getRoomNumber(), request.getRoomType(), request.getPricePerNight());
+
+        if (roomRepository.existsByRoomNumber(request.getRoomNumber())) {
+            log.warn("⚠️ Номер с таким номером уже существует. Номер: {}", request.getRoomNumber());
+            throw new IllegalStateException("Номер с таким номером уже существует.");
+        }
 
         RoomEntity room = new RoomEntity();
         room.setRoomNumber(request.getRoomNumber());
@@ -46,41 +67,76 @@ public class RoomServiceImpl implements RoomService {
         room.setDescription(request.getDescription());
         room.setActive(true);
 
-        log.info("Room created with number: {}", room.getRoomNumber());
-        return roomRepository.save(room);
+        RoomEntity savedRoom = roomRepository.save(room);
+        log.info("✅ Номер успешно создан. ID: {}, Номер: {}", savedRoom.getId(), savedRoom.getRoomNumber());
+        return savedRoom;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public RoomEntity updateRoom(UUID roomId, UpdateRoomRequest request) {
+        log.info("▶️ Запрос на обновление номера. ID: {}", roomId);
 
-        var room = roomRepository.findById(roomId).orElseThrow(() ->
-                new EntityNotFoundException("Room not found"));
+        var room = roomRepository.findById(roomId).orElseThrow(() -> {
+            log.warn("⚠️ Номер не найден. ID: {}", roomId);
+            return new EntityNotFoundException("Room not found");
+        });
 
-        if (request.getRoomType() != null) room.setRoomType(request.getRoomType());
-        if (request.getPricePerNight() != null) room.setPricePerNight(request.getPricePerNight());
-        if (request.getDescription() != null) room.setDescription(request.getDescription());
-        if (request.getActive() != null) room.setActive(request.getActive());
+        if (request.getRoomType() != null) {
+            log.debug("Обновление типа комнаты с {} на {}", room.getRoomType(), request.getRoomType());
+            room.setRoomType(request.getRoomType());
+        }
+        if (request.getPricePerNight() != null) {
+            log.debug("Обновление цены с {} на {}", room.getPricePerNight(), request.getPricePerNight());
+            room.setPricePerNight(request.getPricePerNight());
+        }
+        if (request.getDescription() != null) {
+            log.debug("Обновление описания");
+            room.setDescription(request.getDescription());
+        }
+        if (request.getActive() != null) {
+            log.debug("Обновление статуса активности с {} на {}", room.isActive(), request.getActive());
+            room.setActive(request.getActive());
+        }
 
-        return roomRepository.save(room);
+        RoomEntity updatedRoom = roomRepository.save(room);
+        log.info("✅ Номер успешно обновлен. ID: {}, Номер: {}", updatedRoom.getId(), updatedRoom.getRoomNumber());
+        return updatedRoom;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deactivateRoom(UUID roomId) {
+        log.info("▶️ Запрос на деактивацию номера. ID: {}", roomId);
 
-        var room = roomRepository.findById(roomId).orElseThrow(() ->
-                new EntityNotFoundException("Room not found"));
+        var room = roomRepository.findById(roomId).orElseThrow(() -> {
+            log.warn("⚠️ Номер не найден. ID: {}", roomId);
+            return new EntityNotFoundException("Номер не найден.");
+        });
 
-        if (!room.isActive()) throw new IllegalStateException("Room is already deactivated");
+        if (!room.isActive()) {
+            log.warn("⚠️ Номер уже деактивирован. ID: {}", roomId);
+            throw new IllegalStateException("Номер уже деактивирован.");
+        }
+
         room.setActive(false);
-
         roomRepository.save(room);
+        log.info("✅ Номер успешно деактивирован. ID: {}, Номер: {}", roomId, room.getRoomNumber());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BigDecimal calculatePriceForDays(RoomEntity room, int days) {
-        log.info("▶️ Расчет стоимости для комнаты {}. Количество дней: {}", room.getRoomNumber(), days);
+        log.info("▶️ Расчет стоимости. Номер: {}, Цена за ночь: {}, Дней: {}",
+                room.getRoomNumber(), room.getPricePerNight(), days);
         BigDecimal price = room.getPricePerNight().multiply(BigDecimal.valueOf(days));
-        log.info("✅ Стоимость рассчитана: {} ₽", price);
+        log.info("✅ Итоговая стоимость: {}", price);
         return price;
     }
 }

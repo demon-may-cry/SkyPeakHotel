@@ -2,6 +2,7 @@ package com.skypeak.hotel.service;
 
 import com.skypeak.hotel.entity.UserEntity;
 import com.skypeak.hotel.entity.enums.Role;
+import com.skypeak.hotel.service.impl.UserServiceImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
  * таких как поиск, изменение ролей и статуса.
  *
  * @author Дмитрий Ельцов
- * @see com.skypeak.hotel.service.impl.UserServiceImpl
+ * @see UserServiceImpl
  */
 public interface UserService {
 

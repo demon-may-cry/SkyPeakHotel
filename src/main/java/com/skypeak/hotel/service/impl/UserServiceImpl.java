@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+import static java.text.MessageFormat.format;
+
 /**
  * Реализация сервиса {@link UserService} для управления пользователями.
  * <p>
@@ -24,8 +26,7 @@ import java.util.UUID;
  * Все операции, изменяющие данные, выполняются в транзакциях.
  *
  * @author Дмитрий Ельцов
- * @see UserRepository
- * @see RoleRepository
+ * @see UserService
  */
 @RequiredArgsConstructor
 @Service
@@ -76,12 +77,12 @@ public class UserServiceImpl implements UserService {
 
         if (currentRole == role) {
             log.warn("⚠️ Пользователь {} уже имеет роль {}", id, role);
-            throw new IllegalArgumentException("Пользователь уже имеет роль: " + role.name());
+            throw new IllegalArgumentException(format("Пользователь уже имеет роль: {0}", role.name()));
         }
 
         RoleEntity roleEntity = roleRepository.findByName(role).orElseThrow(() -> {
             log.error("🚫 Системная роль '{}' не найдена в базе данных!", role);
-            return new EntityNotFoundException("Роль не найдена: " + role.name());
+            return new EntityNotFoundException(format("Роль не найдена: {0}", role.name()));
         });
 
         user.setRole(roleEntity);
@@ -139,7 +140,7 @@ public class UserServiceImpl implements UserService {
         log.info("  🔎 Поиск пользователя по ID: {}", id);
         return userRepository.findById(id).orElseThrow(() -> {
             log.error("🚫 Пользователь с ID {} не найден", id);
-            return new EntityNotFoundException("Пользователь с ID " + id + " не найден.");
+            return new EntityNotFoundException(format("Пользователь с ID {0} не найден.", id));
         });
     }
 }

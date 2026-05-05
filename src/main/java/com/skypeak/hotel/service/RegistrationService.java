@@ -1,6 +1,7 @@
 package com.skypeak.hotel.service;
 
 import com.skypeak.hotel.dto.auth.RegisterRequest;
+import com.skypeak.hotel.service.impl.RegistrationServiceImpl;
 
 /**
  * Сервис регистрации пользователей отеля.
@@ -18,7 +19,7 @@ import com.skypeak.hotel.dto.auth.RegisterRequest;
  *
  * @author Дмитрий Ельцов
  * @see RegisterRequest
- * @see com.skypeak.hotel.service.impl.RegistrationServiceImpl
+ * @see RegistrationServiceImpl
  */
 public interface RegistrationService {
 

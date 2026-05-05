@@ -32,6 +32,7 @@ import java.time.LocalDateTime;
  * транзакция откатывается, и в базе данных не остается никаких изменений.
  *
  * @author Дмитрий Ельцов
+ * @see RegistrationService
  */
 @RequiredArgsConstructor
 @Service
