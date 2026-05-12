@@ -14,7 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
+
+import static java.text.MessageFormat.format;
 
 /**
  * Реализация сервиса для управления номерами отеля.
@@ -33,6 +36,12 @@ import java.util.UUID;
 public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
+
+    @Override
+    public RoomEntity getRoomById(UUID roomId) {
+        return roomRepository.findById(roomId).orElseThrow(() ->
+                new EntityNotFoundException(format("Комната с id {0} не найдена", roomId)));
+    }
 
     /**
      * {@inheritDoc}

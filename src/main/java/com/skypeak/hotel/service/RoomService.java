@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -31,6 +32,8 @@ import java.util.UUID;
  * @see BookingService
  */
 public interface RoomService {
+
+    RoomEntity getRoomById(UUID roomId);
 
     /**
      * Возвращает пагинированный список активных номеров, доступных для бронирования.
