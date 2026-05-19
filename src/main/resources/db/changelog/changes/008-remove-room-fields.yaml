@@ -1,0 +1,14 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 8
+      author: Dmitriy_Eltsov
+      changes:
+
+        - dropColumn:
+            tableName: rooms
+            columnName: price_per_night
+
+        - dropColumn:
+            tableName: rooms
+            columnName: description

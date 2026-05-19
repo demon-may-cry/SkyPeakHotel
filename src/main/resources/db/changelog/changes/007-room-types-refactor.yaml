@@ -1,0 +1,186 @@
+databaseChangeLog:
+  - changeSet:
+      id: 7
+      author: Dmitriy_Eltsov
+
+      changes:
+
+        # Создание таблицы типов номеров
+        - createTable:
+            tableName: room_types
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: slug
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: description
+                  type: TEXT
+
+              - column:
+                  name: base_price
+                  type: NUMERIC(10,2)
+                  constraints:
+                    nullable: false
+
+        # Добавляем типы номеров
+
+        # STANDARD
+        - insert:
+            tableName: room_types
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: slug
+                  value: standard
+
+              - column:
+                  name: title
+                  value: Standard Room
+
+              - column:
+                  name: description
+                  value: >
+                    Уютный стандартный номер с современным интерьером,
+                    большой кроватью и всем необходимым
+                    для комфортного отдыха в горах.
+
+              - column:
+                  name: base_price
+                  valueNumeric: "9500.00"
+
+
+        # APARTMENTS
+        - insert:
+            tableName: room_types
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: slug
+                  value: apartments
+
+              - column:
+                  name: title
+                  value: SkyPeak Apartments
+
+              - column:
+                  name: description
+                  value: >
+                    Просторные апартаменты с отдельной гостиной зоной,
+                    панорамными окнами и расширенным набором удобств
+                    для длительного и комфортного проживания.
+
+              - column:
+                  name: base_price
+                  valueNumeric: "16000.00"
+
+
+        # SUITE
+        - insert:
+            tableName: room_types
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+
+              - column:
+                  name: slug
+                  value: suite
+
+              - column:
+                  name: title
+                  value: Panorama Suite
+
+              - column:
+                  name: description
+                  value: >
+                    Премиальный люкс с эксклюзивным интерьером,
+                    просторной террасой и панорамным видом
+                    на горные вершины.
+
+              - column:
+                  name: base_price
+                  valueNumeric: "27000.00"
+
+        # Добавляем room_type_id в rooms
+        - addColumn:
+            tableName: rooms
+            columns:
+              - column:
+                  name: room_type_id
+                  type: UUID
+
+        # Связываем STANDARD комнаты
+        - sql:
+            sql: |
+              UPDATE rooms
+              SET room_type_id = (
+                  SELECT id
+                  FROM room_types
+                  WHERE slug = 'standard'
+              )
+              WHERE room_type = 'STANDARD';
+
+        # Связываем APARTMENTS комнаты
+        - sql:
+            sql: |
+              UPDATE rooms
+              SET room_type_id = (
+                  SELECT id
+                  FROM room_types
+                  WHERE slug = 'apartments'
+              )
+              WHERE room_type = 'APARTMENTS';
+
+        # Связываем SUITE комнаты
+        - sql:
+            sql: |
+              UPDATE rooms
+              SET room_type_id = (
+                  SELECT id
+                  FROM room_types
+                  WHERE slug = 'suite'
+              )
+              WHERE room_type = 'SUITE';
+
+        # Делаем room_type_id обязательным
+        - addNotNullConstraint:
+            tableName: rooms
+            columnName: room_type_id
+
+        # Добавляем FK
+        - addForeignKeyConstraint:
+            baseTableName: rooms
+            baseColumnNames: room_type_id
+
+            referencedTableName: room_types
+            referencedColumnNames: id
+
+            constraintName: fk_rooms_room_type
+
+        # Удаляем старый room_type
+        - dropColumn:
+            tableName: rooms
+            columnName: room_type
