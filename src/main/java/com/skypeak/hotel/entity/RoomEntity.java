@@ -1,16 +1,12 @@
 package com.skypeak.hotel.entity;
 
-import com.skypeak.hotel.entity.enums.RoomType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.util.UUID;
-
-import static com.skypeak.hotel.entity.enums.RoomType.*;
 
 /**
  * Сущность комнаты в отеле.
@@ -22,14 +18,12 @@ import static com.skypeak.hotel.entity.enums.RoomType.*;
  * <ul>
  *   <li>{@link #id} - UUID, генерируется автоматически</li>
  *   <li>{@link #roomNumber} - уникальный номер комнаты, до 20 символов</li>
- *   <li>{@link #roomType} - тип комнаты ({@link RoomType})</li>
- *   <li>{@link #pricePerNight} - цена за ночь</li>
+ *   <li>{@link #roomType} - тип комнаты ({@link RoomTypeEntity})</li>
  *   <li>{@link #active} - флаг доступности для бронирования</li>
- *   <li>{@link #description} - описание комнаты, до 255 символов</li>
  * </ul>
  *
  * @author Дмитрий Ельцов
- * @see RoomType
+ * @see RoomTypeEntity
  */
 @Getter
 @Setter
@@ -54,23 +48,6 @@ public class RoomEntity {
     private String roomNumber;
 
     /**
-     * Тип комнаты.
-     * Определяет категорию номера (STANDARD, APARTMENTS, SUITE).
-     */
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    @Column(name = "room_type", nullable = false, length = 30)
-    private RoomType roomType;
-
-    /**
-     * Цена комнаты за одну ночь.
-     * Хранится с точностью до 2 знаков после запятой.
-     */
-    @NotNull
-    @Column(name = "price_per_night", nullable = false, precision = 10, scale = 2)
-    private BigDecimal pricePerNight;
-
-    /**
      * Флаг активности комнаты.
      * Определяет, доступна ли комната для бронирования.
      */
@@ -78,13 +55,9 @@ public class RoomEntity {
     @Column(name = "active", nullable = false)
     private boolean active;
 
-    /**
-     * Описание комнаты.
-     * Дополнительная информация о характеристиках номера, максимум 255 символов.
-     */
-    @Size(max = 255)
-    @Column(name = "description")
-    private String description;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_type_id", nullable = false)
+    private RoomTypeEntity roomType;
 
     /**
      * Проверяет, доступна ли комната для бронирования.
@@ -98,17 +71,13 @@ public class RoomEntity {
     }
 
     /**
-     * Возвращает описание типа комнаты.
+     * Использует заголовок из сущности типа комнаты.
      *
      * @return строковое описание типа комнаты
      */
     @SuppressWarnings("unused")
-    public String getRoomTypeDescription() {
-        return switch (roomType) {
-            case STANDARD -> "Стандартный номер с базовым набором удобств";
-            case APARTMENTS -> "Апартаменты с расширенным набором удобств";
-            case SUITE -> "Люкс с премиум уровнем комфорта";
-        };
+    public String getRoomTitle() {
+        return roomType.getTitle();
     }
 
     /**
@@ -119,22 +88,22 @@ public class RoomEntity {
      */
     @SuppressWarnings("unused")
     public String getDisplayName() {
-        return "Номер " + roomNumber + " - " + getRoomTypeDescription();
+        return "Номер " + roomNumber + " - " + roomType.getTitle();
     }
 
     /**
      * Возвращает полное описание комнаты.
-     * Включает номер, тип, цену и дополнительное описание.
+     * Включает номер, тип, цену и расширенное описание из категории.
      *
      * @return полное описание комнаты
      */
     @SuppressWarnings("unused")
     public String getFullDescription() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Номер ").append(roomNumber).append(" - ").append(getRoomTypeDescription());
+        sb.append("Номер ").append(roomNumber).append(" - ").append(roomType.getTitle());
         sb.append("\nЦена за ночь: ").append(getFormattedPrice());
-        if (description != null && !description.trim().isEmpty()) {
-            sb.append("\nОписание: ").append(description);
+        if (roomType.getDescription() != null && !roomType.getDescription().trim().isEmpty()) {
+            sb.append("\n\n").append(roomType.getDescription());
         }
         return sb.toString();
     }
@@ -146,7 +115,7 @@ public class RoomEntity {
      */
     @SuppressWarnings("unused")
     public String getFormattedPrice() {
-        return pricePerNight + " ₽";
+        return roomType.getBasePrice().toString() + " ₽";
     }
 
     /**
@@ -156,7 +125,7 @@ public class RoomEntity {
      */
     @SuppressWarnings("unused")
     public boolean isStandard() {
-        return roomType == STANDARD;
+        return "standard".equals(roomType.getSlug());
     }
 
     /**
@@ -166,7 +135,7 @@ public class RoomEntity {
      */
     @SuppressWarnings("unused")
     public boolean isApartments() {
-        return roomType == APARTMENTS;
+        return "apartments".equals(roomType.getSlug());
     }
 
     /**
@@ -176,7 +145,7 @@ public class RoomEntity {
      */
     @SuppressWarnings("unused")
     public boolean isSuite() {
-        return roomType == SUITE;
+        return "suite".equals(roomType.getSlug());
     }
 
 }

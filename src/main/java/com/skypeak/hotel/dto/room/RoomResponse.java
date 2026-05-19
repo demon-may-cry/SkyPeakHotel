@@ -1,7 +1,5 @@
 package com.skypeak.hotel.dto.room;
 
-import com.skypeak.hotel.entity.enums.RoomType;
-
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -21,8 +19,7 @@ import java.util.UUID;
 public record RoomResponse(
         UUID id,
         String roomNumber,
-        RoomType roomType,
-        BigDecimal pricePerNight,
-        boolean active,
-        String description) {
+        String roomType,
+        BigDecimal basePrice,
+        boolean active) {
 }

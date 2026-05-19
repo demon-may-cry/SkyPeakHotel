@@ -32,19 +32,25 @@ public class CreateRoomRequest {
      * Не должен быть пустым/null.
      */
     @NotNull
-    private RoomType roomType;
+    private String roomType;
 
     /**
+     *
+     */
+    @NotNull
+    private boolean active;
+
+/*    *//**
      * Цена комнаты за одну ночь.
      * Не должна быть пустой/null.
-     */
+     *//*
     @NotNull
     private BigDecimal pricePerNight;
 
-    /**
+    *//**
      * Описание/характеристики комнаты.
      * Максимум 255 символов.
-     */
+     *//*
     @Size(max = 255)
-    private String description;
+    private String description;*/
 }

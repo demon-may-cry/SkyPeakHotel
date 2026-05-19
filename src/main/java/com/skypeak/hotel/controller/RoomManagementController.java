@@ -3,6 +3,7 @@ package com.skypeak.hotel.controller;
 import com.skypeak.hotel.dto.room.CreateRoomRequest;
 import com.skypeak.hotel.dto.room.RoomResponse;
 import com.skypeak.hotel.dto.room.UpdateRoomRequest;
+import com.skypeak.hotel.entity.RoomEntity;
 import com.skypeak.hotel.mapper.RoomMapper;
 import com.skypeak.hotel.service.RoomService;
 import jakarta.validation.Valid;
@@ -43,14 +44,14 @@ public class RoomManagementController {
      */
     @PostMapping
     public RoomResponse createRoom(@RequestBody @Valid CreateRoomRequest request) {
-        log.info("▶️ Получен запрос на создание новой комнаты. Номер: {}, Тип: {}, Цена за ночь: {}",
-                request.getRoomNumber(), request.getRoomType(), request.getPricePerNight());
+        log.info("▶️ Получен запрос на создание новой комнаты. Номер: {}, Тип: {}",
+                request.getRoomNumber(), request.getRoomType());
 
-        var room = roomService.createRoom(request);
+        RoomEntity room = roomService.createRoom(request);
 
         RoomResponse response = roomMapper.toDto(room);
-        log.info("✅ Комната успешно создана. ID: {}, Номер: {}, Тип: {}, Цена за ночь: {}",
-                response.id(), response.roomNumber(), response.roomType(), response.pricePerNight());
+        log.info("✅ Комната успешно создана. ID: {}, Номер: {}, Тип: {}",
+                response.id(), response.roomNumber(), response.roomType());
         return response;
     }
 
@@ -66,14 +67,14 @@ public class RoomManagementController {
     @PutMapping("/{id}")
     public RoomResponse updateRoom(@PathVariable UUID id,
                                    @RequestBody @Valid UpdateRoomRequest request) {
-        log.info("▶️ Получен запрос на обновление комнаты {}. Новый тип: {}, Новая цена за ночь: {}",
-                id, request.getRoomType(), request.getPricePerNight());
+        log.info("▶️ Получен запрос на обновление комнаты {}. Новый тип: {}",
+                id, request.getRoomType());
 
-        var room = roomService.updateRoom(id, request);
+        RoomEntity room = roomService.updateRoom(id, request);
 
         RoomResponse response = roomMapper.toDto(room);
-        log.info("✅ Комната {} успешно обновлена. Новый номер: {}, Новый тип: {}, Новая цена за ночь: {}",
-                id, response.roomNumber(), response.roomType(), response.pricePerNight());
+        log.info("✅ Комната {} успешно обновлена. Новый номер: {}, Новый тип: {}",
+                id, response.roomNumber(), response.roomType());
         return response;
     }
 

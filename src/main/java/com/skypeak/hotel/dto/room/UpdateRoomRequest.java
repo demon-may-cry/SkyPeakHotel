@@ -19,22 +19,28 @@ import java.math.BigDecimal;
 public class UpdateRoomRequest {
 
     /**
+     * Новый номер комнаты.
+     * Опционально - если не указано, остается без изменений.
+     */
+    private String roomNumber;
+
+    /**
      * Новый тип комнаты.
      * Опционально - если не указано, остается без изменений.
      */
-    private RoomType roomType;
+    private String roomType;
 
-    /**
+/*    *//**
      * Новая цена комнаты за одну ночь.
      * Опционально - если не указано, остается без изменений.
-     */
+     *//*
     private BigDecimal pricePerNight;
 
-    /**
+    *//**
      * Новое описание комнаты.
      * Опционально - если не указано, остается без изменений.
-     */
-    private String description;
+     *//*
+    private String description;*/
 
     /**
      * Флаг активности комнаты (доступна/недоступна для бронирования).

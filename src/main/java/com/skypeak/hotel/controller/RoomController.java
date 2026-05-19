@@ -6,8 +6,10 @@ import com.skypeak.hotel.mapper.RoomMapper;
 import com.skypeak.hotel.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,7 +54,8 @@ public class RoomController {
      * @return {@link Page} с {@link RoomResponse} активных комнат.
      */
     @GetMapping()
-    public Page<RoomResponse> getActiveRooms(Pageable pageable) {
+    public Page<RoomResponse> getActiveRooms(@ParameterObject
+                                                 @PageableDefault(sort = "roomNumber") Pageable pageable) {
         log.info("▶️ Получен запрос на получение списка активных комнат. Параметры пагинации: {}", pageable);
 
         Page<RoomResponse> rooms = roomService.getActiveRooms(pageable)

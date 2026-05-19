@@ -4,11 +4,11 @@ import com.skypeak.hotel.dto.room.CreateRoomRequest;
 import com.skypeak.hotel.dto.room.UpdateRoomRequest;
 import com.skypeak.hotel.entity.RoomEntity;
 import com.skypeak.hotel.service.impl.RoomServiceImpl;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -33,6 +33,17 @@ import java.util.UUID;
  */
 public interface RoomService {
 
+    /**
+     * Получает номер по его идентификатору.
+     * <p>
+     * Вспомогательный метод для получения существующего номера.
+     * Если номер не найден, выбрасывает исключение EntityNotFoundException.
+     * </p>
+     *
+     * @param roomId UUID идентификатор номера
+     * @return найденная сущность {@link RoomEntity}
+     * @throws EntityNotFoundException если номер не найден в БД
+     */
     RoomEntity getRoomById(UUID roomId);
 
     /**
@@ -91,8 +102,8 @@ public interface RoomService {
      * </p>
      *
      * @param room сущность комнаты с ценой за ночь
-     * @param days количество дней проживания
+     * @param nights количество ночей
      * @return {@code BigDecimal} общая стоимость за указанный период
      */
-    BigDecimal calculatePriceForDays(RoomEntity room, int days);
+    BigDecimal calculatePriceForDays(RoomEntity room, int nights);
 }

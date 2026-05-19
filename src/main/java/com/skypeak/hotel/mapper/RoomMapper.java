@@ -5,6 +5,7 @@ import com.skypeak.hotel.entity.RoomEntity;
 import com.skypeak.hotel.mapper.config.CentralMapperConfig;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 /**
  * Маппер для преобразования между RoomEntity и RoomResponse DTO.
@@ -39,7 +40,7 @@ public interface RoomMapper {
      */
     @BeanMapping(ignoreUnmappedSourceProperties = {
             "available",
-            "roomTypeDescription",
+            "roomTitle",
             "displayName",
             "fullDescription",
             "formattedPrice",
@@ -47,5 +48,7 @@ public interface RoomMapper {
             "apartments",
             "suite"
     })
+    @Mapping(source = "roomType.slug", target = "roomType")
+    @Mapping(source = "roomType.basePrice", target = "basePrice")
     RoomResponse toDto(RoomEntity room);
 }
