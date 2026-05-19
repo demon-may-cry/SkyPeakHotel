@@ -70,6 +70,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/rooms",
                                 "/api/v1/rooms/**",
+                                "/api/v1/room-types",
+                                "/api/v1/room-types/**",
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/register",
                                 "/error",
