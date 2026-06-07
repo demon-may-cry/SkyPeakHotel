@@ -14,10 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import com.skypeak.hotel.security.CustomUserDetails;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,49 +60,56 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserEntity getUserById(UUID id) {
         log.info("▶️ Запрос на получение пользователя по ID: {}", id);
-        checkOwnerOrAdmin(id);
         return getUserOrThrow(id);
     }
 
     @Override
-    public void updateUserProfile(UUID id, UpdateUserProfileRequest request) {
-        log.info("▶️ Запрос на обновление профиля пользователя: {}", id);
-        checkOwnerOrAdmin(id);
-        UserEntity user = getUserOrThrow(id);
+    public UserEntity getUserByEmail(String email) {
+        log.info("▶️ Запрос на получение пользователя по email: {}", email);
+        return userRepository.findByEmail(email).orElseThrow(() -> {
+            log.error("🚫 Пользователь с email {} не найден", email);
+            return new EntityNotFoundException(format("Пользователь с ID {0} не найден.", email));
+        });
+    }
+
+    @Override
+    public void updateUserProfile(String email, UpdateUserProfileRequest request) {
+        log.info("▶️ Запрос на обновление профиля пользователя: {}", email);
+        UserEntity user = getUserByEmail(email);
 
         if (request.password() != null) {
             user.setPassword(passwordEncoder.encode(request.password()));
-            log.info("✅ Пароль пользователя {} успешно обновлен", id);
+            log.info("✅ Пароль пользователя {} успешно обновлен", email);
         }
 
         if (request.firstName() != null) {
             user.setFirstName(request.firstName());
-            log.info("✅ Имя пользователя {} успешно обновлено", id);
+            log.info("✅ Имя пользователя {} успешно обновлено", email);
         }
 
         if (request.lastName() != null) {
             user.setLastName(request.lastName());
-            log.info("✅ Фамилия пользователя {} успешно обновлена", id);
+            log.info("✅ Фамилия пользователя {} успешно обновлена", email);
         }
 
         if (request.middleName() != null) {
             user.setMiddleName(request.middleName());
-            log.info("✅ Отчество пользователя {} успешно обновлено", id);
+            log.info("✅ Отчество пользователя {} успешно обновлено", email);
         }
 
         if (request.birthDate() != null) {
             user.setBirthDate(request.birthDate());
-            log.info("✅ Дата рождения пользователя {} успешно обновлена", id);
+            log.info("✅ Дата рождения пользователя {} успешно обновлена", email);
         }
 
         if (request.avatarUrl() != null) {
             user.setAvatarUrl(request.avatarUrl());
-            log.info("✅ URL аватара пользователя {} успешно обновлен", id);
+            log.info("✅ URL аватара пользователя {} успешно обновлен", email);
         }
 
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
-        log.info("✅ Профиль пользователя {} успешно обновлен", id);
+        log.info("✅ Профиль пользователя {} успешно обновлен", email);
 
     }
 
@@ -196,33 +199,5 @@ public class UserServiceImpl implements UserService {
             log.error("🚫 Пользователь с ID {} не найден", id);
             return new EntityNotFoundException(format("Пользователь с ID {0} не найден.", id));
         });
-    }
-
-    /**
-     * Быстрая проверка доступа: разрешаем, если текущий пользователь является владельцем ресурса
-     * или имеет роль MANAGER / ADMIN. В противном случае выбрасываем AccessDeniedException.
-     */
-    private void checkOwnerOrAdmin(UUID resourceOwnerId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            throw new AccessDeniedException("Пользователь не авторизован");
-        }
-
-        boolean isManagerOrAdmin = auth.getAuthorities().stream()
-                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority())
-                        || "ROLE_MANAGER".equals(a.getAuthority()));
-
-        if (isManagerOrAdmin) {
-            return; // менеджеры и админы имеют доступ
-        }
-
-        Object principal = auth.getPrincipal();
-        if (principal instanceof CustomUserDetails user) {
-            if (user.getId() != null && user.getId().equals(resourceOwnerId)) {
-                return; // владелец ресурса
-            }
-        }
-
-        throw new AccessDeniedException("Доступ запрещён");
     }
 }

@@ -37,7 +37,9 @@ public interface UserService {
      */
     UserEntity getUserById(UUID id);
 
-    void updateUserProfile(UUID id, UpdateUserProfileRequest request);
+    UserEntity getUserByEmail(String email);
+
+    void updateUserProfile(String email, UpdateUserProfileRequest request);
 
     /**
      * Изменяет роль указанного пользователя.

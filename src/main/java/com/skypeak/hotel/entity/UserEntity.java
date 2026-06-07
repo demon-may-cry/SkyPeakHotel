@@ -142,7 +142,7 @@ public class UserEntity {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", updatable = false, nullable = false)
+    @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 

@@ -97,9 +97,17 @@ public class UserManagementControllerTest {
                     UserEntity user = invocation.getArgument(0);
                     return new UserResponse(
                             user.getId(),
+                            user.getPhoneNumber(),
                             user.getEmail(),
                             user.getStatus().name(),
-                            user.getRole().getName().name());
+                            user.getRole().getName().name(),
+                            user.getFirstName(),
+                            user.getLastName(),
+                            user.getMiddleName(),
+                            user.getBirthDate(),
+                            user.getAvatarUrl(),
+                            user.getCreatedAt(),
+                            user.getLastLoginAt());
                 });
 
         // When
@@ -128,9 +136,17 @@ public class UserManagementControllerTest {
 
         var response = new UserResponse(
                 user.getId(),
+                "+79998887766",
                 "user@skypeak.com",
                 Status.ACTIVE.name(),
-                Role.USER.name()
+                Role.USER.name(),
+                "firstName",
+                "lastName",
+                "middleName",
+                null,
+                null,
+                null,
+                null
         );
 
         given(userService.getUserById(user.getId())).willReturn(user);
