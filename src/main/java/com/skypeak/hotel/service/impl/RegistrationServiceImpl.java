@@ -58,6 +58,12 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
         log.info("✅ Email {} свободен для регистрации", request.getEmail());
 
+        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            log.error("🚫 Пользователь с номером телефона {} уже существует", request.getPhoneNumber());
+            throw new IllegalStateException("Пользователь с таким номером телефона уже существует");
+        }
+        log.info("✅ Номер телефона {} свободен для регистрации", request.getPhoneNumber());
+
         var role = roleRepository.findByName(Role.USER).orElseThrow(() -> {
             log.error("🚫 Системная роль 'USER' не найдена в базе данных!");
             return new IllegalStateException("Роль 'USER' не найдена. Регистрация невозможна.");
@@ -69,10 +75,16 @@ public class RegistrationServiceImpl implements RegistrationService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(role);
         user.setStatus(Status.ACTIVE);
-        log.info("  ➕ Создаем сущность пользователя: email={}, роль={}, статус={}",
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setPhoneNumber(request.getPhoneNumber());
+        log.info("  ➕ Создаем сущность пользователя: email={}, роль={}, статус={}, имя={}, фамилия={}, телефон={}",
                 user.getEmail(),
                 user.getRole().getName(),
-                user.getStatus());
+                user.getStatus(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPhoneNumber());
 
         userRepository.save(user);
         log.info("✅ Пользователь {} успешно сохранен в базе данных", user.getEmail());

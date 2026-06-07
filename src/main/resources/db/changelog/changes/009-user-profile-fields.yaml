@@ -1,0 +1,76 @@
+# Добавляем поля в таблицу users
+databaseChangeLog:
+
+  - changeSet:
+      id: 9
+      author: Dmitriy_Eltsov
+
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+
+              # Поле имени
+              - column:
+                  name: first_name
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+
+              # Поле фамилии
+              - column:
+                  name: last_name
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+
+              # Поле отчества (необязательное)
+              - column:
+                  name: middle_name
+                  type: varchar(100)
+                  constraints:
+                    nullable: true
+
+              # Поле номера телефона
+              - column:
+                  name: phone_number
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_users_phone_number
+
+              # Поле даты рождения
+              - column:
+                  name: birth_date
+                  type: DATE
+                  constraints:
+                    nullable: true
+
+              # Поле аватара (необязательное)
+              - column:
+                  name: avatar_url
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+
+              # Поле даты создания профиля
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              # Поле даты обновления профиля
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              # Поле даты последнего входа в систему
+              - column:
+                  name: last_login_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: true

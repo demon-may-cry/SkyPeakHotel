@@ -1,6 +1,7 @@
 package com.skypeak.hotel.dto.auth;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NonNull;
@@ -33,4 +34,20 @@ public class RegisterRequest {
     @NonNull
     @Size(min = 8, max = 100)
     private String password;
+
+    @NonNull
+    @Size(max = 50)
+    private String firstName;
+
+    @NonNull
+    @Size(max = 50)
+    private String lastName;
+
+    @NonNull
+    @Pattern(
+            regexp = "^\\+7\\d{10}$",
+            message = "Номер телефона должен быть в формате +7XXXXXXXXXX"
+    )
+    @Size(max = 20)
+    private String phoneNumber;
 }

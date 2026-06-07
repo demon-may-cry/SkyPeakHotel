@@ -61,6 +61,15 @@ public class DataInitializer implements CommandLineRunner {
     @Value("${admin.password}")
     private String password;
 
+    @Value("${admin.first.name}")
+    private String firstName;
+
+    @Value("${admin.last.name}")
+    private String lastName;
+
+    @Value("${admin.phone.number}")
+    private String phoneNumber;
+
     /**
      * Основной метод инициализации, вызывается Spring Boot при старте.
      * Последовательно создает роли и администратора.
@@ -93,6 +102,9 @@ public class DataInitializer implements CommandLineRunner {
         admin.setPassword(passwordEncoder.encode(password));
         admin.setStatus(Status.ACTIVE);
         admin.setRole(role);
+        admin.setFirstName(firstName);
+        admin.setLastName(lastName);
+        admin.setPhoneNumber(phoneNumber);
 
         userRepository.save(admin);
         log.info("✅ Администратор {} успешно создан", email);

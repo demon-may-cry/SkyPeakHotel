@@ -1,5 +1,6 @@
 package com.skypeak.hotel.service;
 
+import com.skypeak.hotel.dto.user.UpdateUserProfileRequest;
 import com.skypeak.hotel.entity.UserEntity;
 import com.skypeak.hotel.entity.enums.Role;
 import com.skypeak.hotel.service.impl.UserServiceImpl;
@@ -35,6 +36,8 @@ public interface UserService {
      * @throws jakarta.persistence.EntityNotFoundException если пользователь с указанным ID не найден.
      */
     UserEntity getUserById(UUID id);
+
+    void updateUserProfile(UUID id, UpdateUserProfileRequest request);
 
     /**
      * Изменяет роль указанного пользователя.

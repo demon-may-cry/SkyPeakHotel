@@ -57,6 +57,8 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
      */
     boolean existsByEmail(String email);
 
+    boolean existsByPhoneNumber(String phoneNumber);
+
     /**
      * Возвращает всех пользователей с пагинацией, подгружая роли.
      * <p>

@@ -2,6 +2,8 @@ package com.skypeak.hotel.dto.user;
 
 import com.skypeak.hotel.entity.UserEntity;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -19,7 +21,15 @@ import java.util.UUID;
  */
 public record UserResponse(
         UUID id,
+        String phoneNumber,
         String email,
         String status,
-        String role) {
+        String role,
+        String firstName,
+        String lastName,
+        String middleName,
+        LocalDate birthDate,
+        String avatarUrl,
+        LocalDateTime createdAt,
+        LocalDateTime lastLoginAt) {
 }

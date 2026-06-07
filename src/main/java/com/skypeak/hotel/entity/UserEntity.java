@@ -3,12 +3,15 @@ package com.skypeak.hotel.entity;
 import com.skypeak.hotel.entity.enums.Role;
 import com.skypeak.hotel.entity.enums.Status;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static com.skypeak.hotel.entity.enums.Role.*;
@@ -74,8 +77,9 @@ public class UserEntity {
      * Уникальный email пользователя.
      * Максимум 100 символов, индексируется как уникальное поле.
      */
-    @Size(max = 100)
-    @NotNull
+    @Email(message = "Email должен быть корректным")
+    @NotBlank(message = "Email обязателен")
+    @Size(max = 100, message = "Email не может быть длиннее 100 символов")
     @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
 
@@ -83,8 +87,8 @@ public class UserEntity {
      * Закодированный пароль (BCrypt через PasswordEncoder).
      * Хранится в хэшированном виде, максимум 255 символов.
      */
-    @Size(max = 255)
-    @NotNull
+    @NotBlank(message = "Пароль обязателен")
+    @Size(max = 255, message = "Пароль не может быть длиннее 255 символов")
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -93,7 +97,6 @@ public class UserEntity {
      * Определяет доступные действия (см. {@link Status}).
      */
     @Enumerated(EnumType.STRING)
-    @NotNull
     @Column(name = "status", nullable = false, length = 50)
     private Status status;
 
@@ -101,10 +104,50 @@ public class UserEntity {
      * Роль пользователя в системе.
      * Lazy загрузка для избежания N+1 проблемы при выборке пользователей.
      */
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id", nullable = false)
     private RoleEntity role;
+
+    @NotBlank(message = "Имя обязательно")
+    @Size(max = 50, message = "Имя не может быть длиннее 50 символов")
+    @Column(name = "first_name", length = 50, nullable = false)
+    private String firstName;
+
+    @NotBlank(message = "Фамилия обязательна")
+    @Size(max = 50, message = "Фамилия не может быть длиннее 50 символов")
+    @Column(name = "last_name", length = 50, nullable = false)
+    private String lastName;
+
+    @Size(max = 100, message = "Отчество не может быть длиннее 100 символов")
+    @Column(name = "middle_name", length = 100)
+    private String middleName;
+
+    @NotBlank(message = "Номер телефона обязателен")
+    @Pattern(
+            regexp = "^\\+7\\d{10}$",
+            message = "Номер телефона должен быть в формате +7XXXXXXXXXX"
+    )
+    @Size(max = 20, message = "Номер телефона не может быть длиннее 20 символов")
+    @Column(name = "phone_number", length = 20, nullable = false, unique = true)
+    private String phoneNumber;
+
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
+
+    @Size(max = 255, message = "URL аватара не может быть длиннее 255 символов")
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    @Column(name = "created_at", updatable = false, nullable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", updatable = false, nullable = false)
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
 
     /**
      * Проверяет, имеет ли пользователь указанную роль.
@@ -112,9 +155,8 @@ public class UserEntity {
      * @param role роль для проверки
      * @return true если пользователь имеет указанную роль
      */
-    @SuppressWarnings("unused")
     public boolean hasRole(Role role) {
-        return this.role != null && this.role.getName() == role;
+        return this.role != null && this.role.getName().equals(role);
     }
 
     /**
@@ -154,7 +196,7 @@ public class UserEntity {
      */
     @SuppressWarnings("unused")
     public boolean isActive() {
-        return this.status == ACTIVE;
+        return this.status != null && this.status.equals(ACTIVE);
     }
 
     /**
@@ -162,9 +204,8 @@ public class UserEntity {
      *
      * @return true если статус пользователя BLOCKED
      */
-    @SuppressWarnings("unused")
     public boolean isBlocked() {
-        return this.status == BLOCKED;
+        return this.status != null && this.status.equals(BLOCKED);
     }
 
 }
