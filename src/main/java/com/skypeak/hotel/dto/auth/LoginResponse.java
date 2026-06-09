@@ -9,6 +9,10 @@ package com.skypeak.hotel.dto.auth;
  * @param tokenType   тип токена (обычно "Bearer").
  * @author Дмитрий Ельцов
  */
-public record LoginResponse(String accessToken, String tokenType) {
-
+public record LoginResponse(
+        String accessToken,
+        String tokenType,
+        String email,
+        String firstName,
+        String role) {
 }

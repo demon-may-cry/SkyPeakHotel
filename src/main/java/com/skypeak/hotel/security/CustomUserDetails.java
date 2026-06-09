@@ -22,14 +22,15 @@ import java.util.UUID;
  * и авторизации запросов.
  * </p>
  *
- * <h3>Информация о пользователе:</h3>
- * <ul>
+ *  <h3>Информация о пользователе:</h3>
+ *  <ul>
  *   <li>{@link #id} - UUID пользователя</li>
  *   <li>{@link #email} - используется как username для Spring Security</li>
  *   <li>{@link #password} - закодированный пароль (BCrypt)</li>
+ *   <li>{@link #firstName} - имя пользователя</li>
  *   <li>{@link #status} - статус пользователя (ACTIVE/INACTIVE/BLOCKED)</li>
  *   <li>{@link #authorities} - роли пользователя (ROLE_USER, ROLE_MANAGER, ROLE_ADMIN)</li>
- * </ul>
+ *  </ul>
  *
  * <h3>Статус пользователя:</h3>
  * <ul>
@@ -48,6 +49,7 @@ public class CustomUserDetails implements UserDetails {
     private final UUID id;
     private final String email;
     private final String password;
+    private final String firstName;
     private final Status status;
     private final List<GrantedAuthority> authorities;
 
@@ -64,6 +66,7 @@ public class CustomUserDetails implements UserDetails {
         this.id = user.getId();
         this.email = user.getEmail();
         this.password = user.getPassword();
+        this.firstName = user.getFirstName();
         this.status = user.getStatus();
         this.authorities = List.of(
                 new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));

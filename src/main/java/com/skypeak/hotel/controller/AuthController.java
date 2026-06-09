@@ -4,8 +4,10 @@ import com.skypeak.hotel.dto.auth.LoginRequest;
 import com.skypeak.hotel.dto.auth.LoginResponse;
 import com.skypeak.hotel.dto.auth.RegisterRequest;
 import com.skypeak.hotel.dto.auth.RegisterResponse;
+import com.skypeak.hotel.security.CustomUserDetails;
 import com.skypeak.hotel.security.jwt.JwtService;
 import com.skypeak.hotel.service.RegistrationService;
+import com.skypeak.hotel.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final RegistrationService registrationService;
+    private final UserService userService;
 
     /**
      * Аутентифицирует пользователя и возвращает JWT токен.
@@ -55,7 +58,9 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword());
+
         Authentication authentication = authenticationManager.authenticate(authToken);
+
         String role = Objects.requireNonNull(authentication.getAuthorities().stream()
                         .findFirst()
                         .orElseThrow()
@@ -63,8 +68,12 @@ public class AuthController {
                         .replace("ROLE_", "");
         String jwt = jwtService.generateToken(request.getEmail(), role);
 
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        assert userDetails != null;
+
+        userService.updateLastLogin(request.getEmail());
         log.info("✅ Успешная аутентификация для {}. Выдан JWT токен.", request.getEmail());
-        return ResponseEntity.ok(new LoginResponse(jwt, "Bearer"));
+        return ResponseEntity.ok(new LoginResponse(jwt, "Bearer", userDetails.getEmail(), userDetails.getFirstName(), role));
     }
 
     /**
