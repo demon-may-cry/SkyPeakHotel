@@ -41,6 +41,7 @@ public interface UserService {
 
     void updateUserProfile(String email, UpdateUserProfileRequest request);
 
+    void updateLastLogin(String email);
     /**
      * Изменяет роль указанного пользователя.
      *

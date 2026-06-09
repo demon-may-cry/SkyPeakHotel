@@ -113,6 +113,15 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public void updateLastLogin(String email) {
+        log.info("▶️ Запрос на обновление времени последнего входа для пользователя: {}", email);
+        UserEntity user = getUserByEmail(email);
+        user.setLastLoginAt(LocalDateTime.now());
+        userRepository.save(user);
+        log.info("✅ Время последнего входа для пользователя {} успешно обновлено", email);
+    }
+
     /**
      * {@inheritDoc}
      */
