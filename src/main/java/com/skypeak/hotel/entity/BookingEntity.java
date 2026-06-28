@@ -5,7 +5,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -83,6 +87,19 @@ public class BookingEntity {
     @Column(name = "check_out_date", nullable = false)
     private LocalDate checkOutDate;
 
+    @NotNull
+    @Column(name = "guests_count", nullable = false)
+    private Integer guestsCount;
+
+    @NotNull
+    @Column(
+            name = "total_price",
+            nullable = false,
+            precision = 10,
+            scale = 2
+    )
+    private BigDecimal totalPrice;
+
     /**
      * Статус бронирования.
      * Определяет текущее состояние бронирования (см. {@link BookingStatus}).
@@ -96,18 +113,18 @@ public class BookingEntity {
      * Дата и время создания бронирования.
      * Устанавливается автоматически при создании записи, не обновляется.
      */
-    @NotNull
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
-    /**
-     * Проверяет, находится ли бронирование в статусе CREATED.
-     *
-     * @return true если бронирование создано и ожидает выполнения
-     */
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+
     @SuppressWarnings("unused")
-    public boolean isCreated() {
-        return status == CREATED;
+    public boolean isPending() {
+        return status == PENDING;
     }
 
     /**
@@ -120,35 +137,50 @@ public class BookingEntity {
         return status == CANCELLED;
     }
 
-    /**
-     * Проверяет, находится ли бронирование в статусе COMPLETED.
-     *
-     * @return true если проживание завершено
-     */
+
     @SuppressWarnings("unused")
-    public boolean isCompleted() {
-        return status == COMPLETED;
+    public boolean isConfirmed() {
+        return status == CONFIRMED;
+    }
+
+    @SuppressWarnings("unused")
+    public boolean isCheckedOut() {
+        return status == CHECKED_OUT;
     }
 
     /**
      * Проверяет, является ли бронирование активным в текущий момент.
-     * Активным считается бронирование со статусом CREATED и датой заезда не позднее сегодняшней даты.
+     * Активным считается бронирование со статусом PENDING и датой заезда не позднее сегодняшней даты.
      *
      * @return true если бронирование активно
      */
     @SuppressWarnings("unused")
     public boolean isActive() {
-        return isCreated() && !checkInDate.isAfter(LocalDate.now());
+        return isPending() && !checkInDate.isAfter(LocalDate.now());
     }
 
     /**
-     * Возвращает продолжительность пребывания в днях.
+     * Возвращает продолжительность пребывания в отеле.
      *
-     * @return количество дней между датой заезда и выезда
+     * @return количество ночей между датой заезда и выезда
      */
     @SuppressWarnings("unused")
-    public long getDuration() {
+    public long getNights() {
         return ChronoUnit.DAYS.between(checkInDate, checkOutDate);
+    }
+
+    @SuppressWarnings("unused")
+    public BigDecimal getPricePerNight() {
+
+        if (getNights() == 0) {
+
+            return BigDecimal.ZERO;
+        }
+
+        return totalPrice.divide(
+                BigDecimal.valueOf(getNights()),
+                RoundingMode.HALF_UP
+        );
     }
 
     /**
@@ -159,7 +191,8 @@ public class BookingEntity {
      */
     @SuppressWarnings("unused")
     public boolean canBeCancelledByUser() {
-        return isCreated() && checkInDate.isAfter(LocalDate.now());
+        return (status == PENDING || status == CONFIRMED)
+                && checkInDate.isAfter(LocalDate.now());
     }
 
 }

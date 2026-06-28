@@ -6,16 +6,20 @@ package com.skypeak.hotel.entity.enums;
  * Определяет жизненный цикл бронирования от создания до завершения:
  * </p>
  * <ul>
- *   <li>{@link #CREATED} - бронирование создано, ожидает оплаты или подтверждения</li>
- *   <li>{@link #CANCELLED} - бронирование отменено пользователем или администратором</li>
- *   <li>{@link #COMPLETED} - проживание завершено, бронирование закрыто</li>
+ *   <li>{@link #PENDING} - бронирование создано и ожидает подтверждения</li>
+ *   <li>{@link #CONFIRMED} - бронирование подтверждено</li>
+ *   <li>{@link #CHECKED_IN} - гость заселился</li>
+ *   <li>{@link #CHECKED_OUT} - проживание завершено</li>
+ *   <li>{@link #CANCELLED} - бронирование отменено</li>
  * </ul>
  *
  * @author Дмитрий Ельцов
  * @see com.skypeak.hotel.entity.BookingEntity
  */
 public enum BookingStatus {
-    CREATED,
-    CANCELLED,
-    COMPLETED
+    PENDING,
+    CONFIRMED,
+    CHECKED_IN,
+    CHECKED_OUT,
+    CANCELLED
 }
