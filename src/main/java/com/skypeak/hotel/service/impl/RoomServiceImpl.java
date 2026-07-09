@@ -159,7 +159,7 @@ public class RoomServiceImpl implements RoomService {
      */
     @Override
     @Transactional(readOnly = true)
-    public BigDecimal calculatePriceForDays(RoomEntity room, int nights) {
+    public BigDecimal calculatePriceForDays(RoomEntity room, long nights) {
         log.info("▶️ Расчет стоимости. Номер: {}, Кол-во ночей: {}", room.getRoomNumber(), nights);
 
         RoomTypeEntity roomType = room.getRoomType();

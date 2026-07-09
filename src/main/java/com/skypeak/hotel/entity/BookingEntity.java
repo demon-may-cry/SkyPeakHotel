@@ -2,6 +2,8 @@ package com.skypeak.hotel.entity;
 
 import com.skypeak.hotel.entity.enums.BookingStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -88,10 +90,12 @@ public class BookingEntity {
     private LocalDate checkOutDate;
 
     @NotNull
+    @Min(1)
     @Column(name = "guests_count", nullable = false)
     private Integer guestsCount;
 
     @NotNull
+    @DecimalMin("0.01")
     @Column(
             name = "total_price",
             nullable = false,
@@ -137,7 +141,6 @@ public class BookingEntity {
         return status == CANCELLED;
     }
 
-
     @SuppressWarnings("unused")
     public boolean isConfirmed() {
         return status == CONFIRMED;
@@ -156,7 +159,8 @@ public class BookingEntity {
      */
     @SuppressWarnings("unused")
     public boolean isActive() {
-        return isPending() && !checkInDate.isAfter(LocalDate.now());
+        return (status == PENDING || status == CONFIRMED)
+                && !checkOutDate.isBefore(LocalDate.now());
     }
 
     /**
@@ -179,13 +183,19 @@ public class BookingEntity {
 
         return totalPrice.divide(
                 BigDecimal.valueOf(getNights()),
+                2,
                 RoundingMode.HALF_UP
         );
     }
 
     /**
-     * Проверяет, может ли пользователь отменить это бронирование.
-     * Бронирование можно отменить только если оно в статусе CREATED и дата заезда не наступила.
+     * Проверяет, может ли пользователь отменить бронирование.
+     * <p>
+     * Пользователь может отменить бронирование только если оно находится
+     * в статусе {@link BookingStatus#PENDING} или
+     * {@link BookingStatus#CONFIRMED},
+     * а дата заезда ещё не наступила.
+     * </p>
      *
      * @return true если бронирование можно отменить
      */
@@ -194,5 +204,4 @@ public class BookingEntity {
         return (status == PENDING || status == CONFIRMED)
                 && checkInDate.isAfter(LocalDate.now());
     }
-
 }

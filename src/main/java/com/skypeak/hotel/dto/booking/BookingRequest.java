@@ -1,11 +1,12 @@
 package com.skypeak.hotel.dto.booking;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 /**
  * DTO для запроса на создание нового бронирования.
@@ -16,14 +17,14 @@ import java.util.UUID;
  */
 @Getter
 @Setter
-public class CreateBookingRequest {
+public class BookingRequest {
 
     /**
-     * Уникальный идентификатор комнаты (UUID), которую хочет забронировать пользователь.
+     * Уникальный идентификатор типа комнаты, которую хочет забронировать пользователь.
      * Не должна быть пустой.
      */
-    @NotNull
-    private UUID roomId;
+    @NotBlank
+    private String roomTypeSlug;
 
     /**
      * Дата заезда пользователя.
@@ -38,4 +39,8 @@ public class CreateBookingRequest {
      */
     @NotNull
     private LocalDate checkOut;
+
+    @NotNull
+    @Min(value = 1, message = "Количество гостей должно быть положительным")
+    private Integer guestsCount;
 }

@@ -41,14 +41,18 @@ public interface BookingMapper {
      * @return DTO бронирования для отправки клиенту
      */
     @BeanMapping(ignoreUnmappedSourceProperties = {
-            "created",
+            "user",
+            "pending",
+            "confirmed",
             "cancelled",
-            "completed",
+            "checkedOut",
             "active",
-            "duration",
-            "user"
+            "nights",
+            "pricePerNight"
     })
     @Mapping(source = "room.id", target = "roomId")
+    @Mapping(source = "room.roomNumber", target = "roomNumber")
+    @Mapping(source = "room.roomType.slug", target = "roomType")
     @Mapping(source = "checkInDate", target = "checkIn")
     @Mapping(source = "checkOutDate", target = "checkOut")
     BookingResponse toDto(BookingEntity booking);

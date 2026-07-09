@@ -2,6 +2,7 @@ package com.skypeak.hotel.dto.booking;
 
 import com.skypeak.hotel.entity.enums.BookingStatus;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -22,8 +23,12 @@ import java.util.UUID;
 public record BookingResponse(
         UUID id,
         UUID roomId,
+        String roomNumber,
+        String roomType,
         LocalDate checkIn,
         LocalDate checkOut,
+        Integer guestsCount,
+        BigDecimal totalPrice,
         BookingStatus status,
         LocalDateTime createdAt) {
 }

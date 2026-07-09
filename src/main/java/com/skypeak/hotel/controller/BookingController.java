@@ -1,16 +1,18 @@
 package com.skypeak.hotel.controller;
 
 import com.skypeak.hotel.dto.booking.BookingResponse;
-import com.skypeak.hotel.dto.booking.CreateBookingRequest;
-import com.skypeak.hotel.mapper.BookingMapper;
-import com.skypeak.hotel.security.CustomUserDetails;
+import com.skypeak.hotel.dto.booking.BookingRequest;
+import com.skypeak.hotel.security.CurrentUserService;
 import com.skypeak.hotel.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -23,7 +25,6 @@ import java.util.UUID;
  *
  * @author Дмитрий Ельцов
  * @see BookingService
- * @see BookingMapper
  */
 @RestController
 @RequestMapping("/api/v1/bookings")
@@ -32,57 +33,55 @@ import java.util.UUID;
 public class BookingController {
 
     private final BookingService bookingService;
-    private final BookingMapper bookingMapper;
+    private final CurrentUserService currentUserService;
 
     /**
      * Создает новое бронирование для пользователя.
      *
-     * @param request     DTO с информацией о бронировании (ID комнаты, дата заезда, дата выезда).
-     * @param userDetails данные аутентифицированного пользователя.
+     * @param request DTO с информацией о бронировании
+     *                (тип номера, даты проживания и количество гостей).
      * @return {@link BookingResponse} с данными созданного бронирования.
      * @throws IllegalArgumentException если даты невалидны или комната недоступна.
      * @throws jakarta.persistence.EntityNotFoundException если комната не найдена.
      */
     @PostMapping
-    public BookingResponse createBooking(@RequestBody @Valid CreateBookingRequest request,
-                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public BookingResponse createBooking(@RequestBody @Valid BookingRequest request) {
+
+        String email = currentUserService.getCurrentUserEmail();
         log.info("▶️ Получен запрос на создание бронирования от пользователя {}. " +
-                        "Комната: {}, Заезд: {}, Выезд: {}",
-                userDetails.getId(), request.getRoomId(), request.getCheckIn(), request.getCheckOut());
+                        "Тип комнаты: {}, Заезд: {}, Выезд: {}",
+                email, request.getRoomTypeSlug(), request.getCheckIn(), request.getCheckOut());
 
-        var booking = bookingService.createBooking(
-                userDetails.getId(),
-                request.getRoomId(),
-                request.getCheckIn(),
-                request.getCheckOut()
-        );
-
-        BookingResponse response = bookingMapper.toDto(booking);
+        BookingResponse response = bookingService.createBooking(email, request);
         log.info("✅ Бронирование успешно создано. ID бронирования: {}, пользователь: {}",
-                response.id(), userDetails.getId());
+                response.id(), email);
+
         return response;
     }
 
     /**
-     * Возвращает пагинированный список всех бронирований пользователя.
+     * Возвращает историю бронирований текущего пользователя.
      *
-     * @param userDetails данные аутентифицированного пользователя.
      * @param pageable    параметры пагинации (page, size, sort).
      * @return {@link Page} с {@link BookingResponse} для пользователя.
      */
-    @GetMapping("/my")
-    public Page<BookingResponse> getMyBookings(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                               Pageable pageable) {
+    @GetMapping("/me")
+    public Page<BookingResponse> getMyBookings(@PageableDefault(
+            sort = "createdAt",
+            direction = Sort.Direction.DESC
+    ) Pageable pageable) {
+
+        String email = currentUserService.getCurrentUserEmail();
         log.info("▶️ Получен запрос на получение бронирований для пользователя {}. " +
-                "Параметры пагинации: {}", userDetails.getId(), pageable);
+                "Параметры пагинации: {}", email, pageable);
 
         Page<BookingResponse> bookings = bookingService.getUserBookings(
-                userDetails.getId(),
-                pageable)
-                .map(bookingMapper::toDto);
-
+                email,
+                pageable);
         log.info("✅ Успешно возвращен список из {} бронирований на странице {}",
                 bookings.getNumberOfElements(), bookings.getNumber());
+
         return bookings;
     }
 
@@ -90,21 +89,22 @@ public class BookingController {
      * Отменяет бронирование по его ID.
      *
      * @param id          UUID бронирования для отмены.
-     * @param userDetails данные аутентифицированного пользователя.
      * @throws jakarta.persistence.EntityNotFoundException если бронирование не найдено.
      * @throws IllegalArgumentException если пользователь не является владельцем бронирования или
      *                                  бронирование уже отменено.
      */
     @DeleteMapping("/{id}")
-    public void cancelBooking(@PathVariable UUID id,
-                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<Void> cancelBooking(@PathVariable UUID id) {
+
+        String email = currentUserService.getCurrentUserEmail();
         log.info("▶️ Получен запрос на отмену бронирования {} от пользователя {}",
-                id, userDetails.getId());
+                id, email);
 
-        bookingService.cancelBooking(id, userDetails.getId());
-
+        bookingService.cancelBooking(email, id);
         log.info("✅ Бронирование {} успешно отменено пользователем {}",
-                id, userDetails.getId());
+                id, email);
+
+        return ResponseEntity.noContent().build();
     }
 
 }

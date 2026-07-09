@@ -1,0 +1,32 @@
+# Добавляем поля в таблицу bookings
+databaseChangeLog:
+
+  - changeSet:
+      id: 10
+      author: Dmitriy_Eltsov
+
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+
+      changes:
+        - addColumn:
+            tableName: bookings
+            columns:
+
+              # Поле количества гостей
+              - column:
+                  name: guests_count
+                  type: INT
+                  constraints:
+                    nullable: false
+
+              # Поле общей стоимости проживания
+              - column:
+                  name: total_price
+                  type: DECIMAL(10, 2)
+                  constraints:
+                    nullable: false
+
+              # Поле даты изменения бронирования
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP

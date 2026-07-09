@@ -17,9 +17,24 @@ package com.skypeak.hotel.entity.enums;
  * @see com.skypeak.hotel.entity.BookingEntity
  */
 public enum BookingStatus {
+    /**
+     * Ожидает подтверждения.
+     */
     PENDING,
+    /**
+     * Подтверждено менеджером.
+     */
     CONFIRMED,
+    /**
+     * Гость заселился.
+     */
     CHECKED_IN,
+    /**
+     * Проживание завершено.
+     */
     CHECKED_OUT,
+    /**
+     * Бронирование отменено.
+     */
     CANCELLED
 }

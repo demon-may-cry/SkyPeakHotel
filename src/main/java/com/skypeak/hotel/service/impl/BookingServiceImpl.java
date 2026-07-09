@@ -1,10 +1,14 @@
 package com.skypeak.hotel.service.impl;
 
+import com.skypeak.hotel.dto.booking.BookingRequest;
+import com.skypeak.hotel.dto.booking.BookingResponse;
 import com.skypeak.hotel.entity.BookingEntity;
 import com.skypeak.hotel.entity.RoomEntity;
 import com.skypeak.hotel.entity.UserEntity;
 import com.skypeak.hotel.entity.enums.BookingStatus;
+import com.skypeak.hotel.mapper.BookingMapper;
 import com.skypeak.hotel.repository.BookingRepository;
+import com.skypeak.hotel.repository.RoomRepository;
 import com.skypeak.hotel.service.BalanceService;
 import com.skypeak.hotel.service.BookingService;
 import com.skypeak.hotel.service.RoomService;
@@ -12,6 +16,7 @@ import com.skypeak.hotel.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,9 +26,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 
-import static java.text.MessageFormat.format;
 
 /**
  * Реализация сервиса для управления бронированиями.
@@ -53,80 +58,68 @@ import static java.text.MessageFormat.format;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
-    private final BalanceService balanceService;
+    private final RoomRepository roomRepository;
+    /*private final BalanceService balanceService;*/
     private final RoomService roomService;
     private final UserService userService;
-
+    private final BookingMapper bookingMapper;
+    //TODO: create booking
     /**
      * {@inheritDoc}
      */
     @Override
-    public BookingEntity createBooking(UUID userId, UUID roomId, LocalDate checkIn, LocalDate checkOut) {
-        log.info("▶️ Запрос на создание бронирования. Пользователь: {}, Номер комнаты: {}, Заезд: {}, Выезд: {}",
-                userId, roomId, checkIn, checkOut);
+    public BookingResponse createBooking(String email, BookingRequest request) {
+        log.info("▶️ Запрос на создание бронирования. Пользователь: {}, Slug типа номера: {}, Заезд: {}, Выезд: {}",
+                email, request.getRoomTypeSlug(), request.getCheckIn(), request.getCheckOut());
 
         // ===== ЭТАП 1: ВАЛИДАЦИЯ (ДО финансовых операций) =====
 
-        // Валидация дат
-        validateBookingDates(checkIn, checkOut);
+        // 1.1 Валидация дат
+        validateBookingDates(request);
 
-        // Проверка пользователя
-        UserEntity user = userService.getUserById(userId);
+        // 1.2 Проверка пользователя
+        UserEntity user = getUser(email);
 
-        if (!user.isActive()) {
-            log.warn("⚠️ Попытка бронирования неактивным пользователем. Пользователь ID: {}", userId);
-            throw new IllegalStateException("Ваш аккаунт неактивен.");
-        }
+        // 1.3 Проверка комнаты
+        RoomEntity room = findAvailableRoom(request.getRoomTypeSlug(), request.getCheckIn(), request.getCheckOut());
+        log.info("✅ Найдена доступная комната для бронирования. Номер комнаты: {}, Slug тип: {}",
+                room.getRoomNumber(), room.getRoomType().getSlug());
 
-        // Проверка комнаты
-        RoomEntity room = roomService.getRoomById(roomId);
-
-        if (!room.isActive()) {
-            log.warn("⚠️ Комната неактивна. Комната ID: {}", roomId);
-            throw new IllegalStateException("Комната неактивна.");
-        }
-
-        // Проверка доступности на период
-        validateRoomAvailability(roomId, checkIn, checkOut);
-
-        // Расчет стоимости
-        long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
-        BigDecimal totalCost = roomService.calculatePriceForDays(room, (int) nights);
-        log.info("💰 Рассчитана стоимость бронирования. Ночей: {}, Сумма: {}", nights, totalCost);
-
-        // Проверка достаточности средств
-        validateUserBalance(user, totalCost);
+        // 1.4 Расчет стоимости
+        long nights =
+                ChronoUnit.DAYS.between(
+                        request.getCheckIn(),
+                        request.getCheckOut()
+                );
+        BigDecimal totalPrice = roomService.calculatePriceForDays(room, nights);
+        log.info("💰 Рассчитана стоимость бронирования. Ночей: {}, Сумма: {}", nights, totalPrice);
 
         // ===== ЭТАП 2: ФИНАНСОВЫЕ ОПЕРАЦИИ =====
 
-        log.debug("💳 Начисление платежа пользователю: {}", userId);
+        // Проверка достаточности средств
+        /*validateUserBalance(user, totalPrice);*/
 
-        String paymentDescription = buildPaymentDescription(room.getRoomNumber(), checkIn, checkOut);
-        balanceService.withdraw(userId, totalCost, paymentDescription);
+        /*log.debug("💳 Начисление платежа пользователю: {}", userId);
+
+        String paymentDescription = buildPaymentDescription(availableRoom.getRoomNumber(), request.getCheckIn(), request.getCheckOut());
+        balanceService.withdraw(user.getId(), totalPrice, paymentDescription);*/
 
         // ===== ЭТАП 3: СОЗДАНИЕ БРОНИРОВАНИЯ =====
-
-        BookingEntity booking = new BookingEntity();
-        booking.setUser(user);
-        booking.setRoom(room);
-        booking.setCheckInDate(checkIn);
-        booking.setCheckOutDate(checkOut);
-        booking.setStatus(BookingStatus.CREATED);
-        booking.setCreatedAt(LocalDateTime.now());
+        BookingEntity booking = buildBooking(user, room, request, totalPrice);
 
         BookingEntity savedBooking = bookingRepository.save(booking);
-        log.info("✅ Бронирование успешно создано. ID: {}, Комната: {}, Пользователь: {}, Стоимость: {}",
-                savedBooking.getId(), room.getRoomNumber(), userId, totalCost);
+        log.info("✅ Бронирование успешно создано. ID: {}, Комната: {}, Пользователь: {}, Стоимость: {}, Ночей: {}",
+                savedBooking.getId(), room.getRoomNumber(), email, booking.getTotalPrice(), booking.getNights());
 
-        return savedBooking;
+        return bookingMapper.toDto(savedBooking);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void cancelBooking(UUID bookingId, UUID userId) {
-        log.info("▶️ Запрос на отмену бронирования. ID: {}, Пользователь ID: {}", bookingId, userId);
+    public void cancelBooking(String email, UUID bookingId) {
+        log.info("▶️ Запрос на отмену бронирования. ID: {}, Пользователь: {}", bookingId, email);
 
         // Получение бронирования
         BookingEntity booking = bookingRepository.findById(bookingId).orElseThrow(() -> {
@@ -135,9 +128,11 @@ public class BookingServiceImpl implements BookingService {
         });
 
         // Проверка прав владельца
-        if (!booking.getUser().getId().equals(userId)) {
+        UserEntity user = getUser(email);
+
+        if (!booking.getUser().getId().equals(user.getId())) {
             log.warn("🚫 Попытка отмены чужого бронирования. ID: {}, Владелец: {}, Заказчик: {}",
-                    bookingId, booking.getUser().getId(), userId);
+                    bookingId, booking.getUser().getId(), user.getId());
             throw new SecurityException("Вы не имеете права отменять это бронирование");
         }
 
@@ -150,11 +145,11 @@ public class BookingServiceImpl implements BookingService {
         log.info("💰 Рассчитана сумма возврата. Ночей: {}, Сумма: {}", nights, refund);
 
         // Выполнение возврата
-        log.debug("💳 Возврат средств пользователю: {}", userId);
+        log.debug("💳 Возврат средств пользователю: {}", user.getId());
 
-        String refundDescription = buildRefundDescription(booking.getRoom().getRoomNumber(),
+        /*String refundDescription = buildRefundDescription(booking.getRoom().getRoomNumber(),
                 booking.getCheckInDate(), booking.getCheckOutDate());
-        balanceService.deposit(userId, refund, refundDescription);
+        balanceService.deposit(user.getId(), refund, refundDescription);*/
 
         // Сохранение статуса отмены
         booking.setStatus(BookingStatus.CANCELLED);
@@ -167,29 +162,75 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     @Transactional(readOnly = true)
-    public Page<BookingEntity> getUserBookings(UUID userId, Pageable pageable) {
-        log.info("▶️ Запрос на получение бронирований пользователя. Пользователь ID: {}, Всего страниц: {}", userId, pageable);
+    public Page<BookingResponse> getUserBookings(String email, Pageable pageable) {
+        log.info("▶️ Запрос на получение бронирований пользователя. Пользователь: {}, Всего страниц: {}", email, pageable);
 
         // Проверка существования пользователя
-        userService.getUserById(userId);
+        UserEntity user = getUser(email);
 
-        Page<BookingEntity> bookings = bookingRepository.findByUser_IdOrderByCreatedAtDesc(userId, pageable);
+        Page<BookingEntity> bookings = bookingRepository.findByUser_IdOrderByCreatedAtDesc(user.getId(), pageable);
         log.info("✅ Бронирования получены. Количество: {}, Всего страниц: {}",
                 bookings.getNumberOfElements(), bookings.getTotalPages());
 
-        return bookings;
+        return bookings.map(bookingMapper::toDto);
     }
 
     // ===== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ =====
 
     /**
-     * Валидирует даты бронирования.
+     * Проверяет доступность комнаты на указанный период.
      *
+     * @param roomTypeSlug Slug типа комнаты
      * @param checkIn дата заезда
      * @param checkOut дата выезда
+     * @throws IllegalStateException если нет доступных комнат
+     */
+    private RoomEntity findAvailableRoom(String roomTypeSlug, LocalDate checkIn, LocalDate checkOut) {
+
+        List<RoomEntity> rooms = roomRepository
+                .findByRoomType_SlugAndActiveTrue(roomTypeSlug);
+
+        if (rooms.isEmpty()) {
+            log.warn("⚠️ Тип номера не найден. Тип: {}", roomTypeSlug);
+            throw new EntityNotFoundException("Тип номера не найден.");
+        }
+
+        RoomEntity availableRoom = null;
+
+        for (RoomEntity room : rooms) {
+            boolean booked =
+                    bookingRepository
+                            .existsByRoom_IdAndStatusNotAndCheckInDateLessThanAndCheckOutDateGreaterThan(
+                                    room.getId(),
+                                    BookingStatus.CANCELLED,
+                                    checkOut,
+                                    checkIn
+                            );
+            if (!booked) {
+                availableRoom = room;
+                break;
+            }
+        }
+
+        if (availableRoom == null) {
+            log.warn("⚠️ Нет доступных комнат для бронирования. Тип комнаты: {}, Заезд: {}, Выезд: {}",
+                    roomTypeSlug, checkIn, checkOut);
+            throw new IllegalStateException("Нет доступных комнат на указанный период.");
+        }
+
+        return availableRoom;
+    }
+
+    /**
+     * Валидирует даты бронирования.
+     *
+     * @param request запрос бронирования.
      * @throws IllegalArgumentException если даты некорректны
      */
-    private void validateBookingDates(LocalDate checkIn, LocalDate checkOut) {
+    private void validateBookingDates(BookingRequest request) {
+        LocalDate checkIn = request.getCheckIn();
+        LocalDate checkOut = request.getCheckOut();
+
         if (checkIn == null || checkOut == null) {
             log.warn("⚠️ Даты бронирования не установлены. Заезд: {}, Выезд: {}", checkIn, checkOut);
             throw new IllegalArgumentException("Даты заезда и выезда обязательны.");
@@ -199,29 +240,33 @@ public class BookingServiceImpl implements BookingService {
             log.warn("⚠️ Некорректные даты бронирования. Заезд: {}, Выезд: {}", checkIn, checkOut);
             throw new IllegalArgumentException("Дата заезда должна быть раньше даты выезда.");
         }
+
+        if (checkIn.isBefore(LocalDate.now())) {
+            log.warn("⚠️ Дата заезда в прошлом. Заезд: {}, Сегодня: {}", checkIn, LocalDate.now());
+            throw new IllegalArgumentException("Дата заезда не может быть в прошлом."
+            );
+        }
     }
 
-    /**
-     * Проверяет доступность комнаты на указанный период.
-     *
-     * @param roomId ID комнаты
-     * @param checkIn дата заезда
-     * @param checkOut дата выезда
-     * @throws IllegalStateException если комната уже забронирована
-     */
-    private void validateRoomAvailability(UUID roomId, LocalDate checkIn, LocalDate checkOut) {
-        boolean bookingExists = bookingRepository.existsByRoom_IdAndStatusNotAndCheckInDateLessThanAndCheckOutDateGreaterThan(
-                roomId,
-                BookingStatus.CANCELLED,
-                checkOut,
-                checkIn
-        );
+    private BookingEntity buildBooking(UserEntity user, RoomEntity room, BookingRequest request, BigDecimal totalPrice) {
+        BookingEntity booking = new BookingEntity();
+        booking.setUser(user);
+        booking.setRoom(room);
+        booking.setCheckInDate(request.getCheckIn());
+        booking.setCheckOutDate(request.getCheckOut());
+        booking.setGuestsCount(request.getGuestsCount());
+        booking.setTotalPrice(totalPrice);
+        booking.setStatus(BookingStatus.PENDING);
+        return booking;
+    }
 
-        if (bookingExists) {
-            log.warn("⚠️ Комната забронирована на указанный период. Комната ID: {}, Заезд: {}, Выезд: {}",
-                    roomId, checkIn, checkOut);
-            throw new IllegalStateException("Комната уже забронирована на указанный период.");
+    private @NonNull UserEntity getUser(String email) {
+        UserEntity user = userService.getUserByEmail(email);
+        if (!user.isActive()) {
+            log.warn("⚠️ Попытка бронирования неактивным пользователем. Пользователь ID: {}", user.getId());
+            throw new IllegalStateException("Ваш аккаунт неактивен.");
         }
+        return user;
     }
 
     /**
@@ -231,14 +276,14 @@ public class BookingServiceImpl implements BookingService {
      * @param amount требуемая сумма
      * @throws IllegalStateException если средств недостаточно
      */
-    private void validateUserBalance(UserEntity user, BigDecimal amount) {
+    /*private void validateUserBalance(UserEntity user, BigDecimal amount) {
         BigDecimal balance = balanceService.getBalance(user.getId());
         if (balance.compareTo(amount) < 0) {
             log.warn("⚠️ Недостаточно средств. Пользователь ID: {}, Необходимо: {}, Доступно: {}",
                     user.getId(), amount, balance);
             throw new IllegalStateException("Недостаточно средств на счете.");
         }
-    }
+    }*/
 
     /**
      * Проверяет возможность отмены бронирования.
@@ -252,7 +297,7 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalStateException("Бронирование уже отменено.");
         }
 
-        if (booking.getStatus() == BookingStatus.COMPLETED) {
+        if (booking.getStatus() == BookingStatus.CHECKED_OUT) {
             log.warn("⚠️ Невозможно отменить завершенное бронирование. ID: {}", booking.getId());
             throw new IllegalStateException("Невозможно отменить завершенное бронирование.");
         }
@@ -266,9 +311,9 @@ public class BookingServiceImpl implements BookingService {
      * @param checkOut дата выезда
      * @return строка описания платежа
      */
-    private String buildPaymentDescription(String roomNumber, LocalDate checkIn, LocalDate checkOut) {
+    /*private String buildPaymentDescription(String roomNumber, LocalDate checkIn, LocalDate checkOut) {
         return format("Оплата за бронирование номера {0} с {1} по {2}", roomNumber, checkIn, checkOut);
-    }
+    }*/
 
     /**
      * Формирует описание возврата средств.
@@ -278,7 +323,7 @@ public class BookingServiceImpl implements BookingService {
      * @param checkOut дата выезда
      * @return строка описания возврата
      */
-    private String buildRefundDescription(String roomNumber, LocalDate checkIn, LocalDate checkOut) {
+    /*private String buildRefundDescription(String roomNumber, LocalDate checkIn, LocalDate checkOut) {
         return format("Возврат за отмену бронирования номера {0} с {1} по {2}", roomNumber, checkIn, checkOut);
-    }
+    }*/
 }

@@ -96,7 +96,7 @@ public interface RoomService {
     void deactivateRoom(UUID roomId);
 
     /**
-     * Рассчитывает стоимость проживания в комнате за указанное количество дней.
+     * Рассчитывает стоимость проживания в комнате за указанное количество ночей.
      * <p>
      * Формула: цена за ночь × количество дней
      * </p>
@@ -105,5 +105,5 @@ public interface RoomService {
      * @param nights количество ночей
      * @return {@code BigDecimal} общая стоимость за указанный период
      */
-    BigDecimal calculatePriceForDays(RoomEntity room, int nights);
+    BigDecimal calculatePriceForDays(RoomEntity room, long nights);
 }

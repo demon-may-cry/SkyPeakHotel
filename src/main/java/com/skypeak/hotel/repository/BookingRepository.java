@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -52,15 +53,19 @@ public interface BookingRepository extends JpaRepository<BookingEntity, UUID> {
      * Используется для предотвращения двойного бронирования одной комнаты.
      * </p>
      *
-     * @param id           UUID комнаты для проверки
-     * @param status       статус бронирования, который исключается из поиска (обычно CANCELLED)
+     * @param roomId       UUID комнаты для проверки
+     * @param status       статус, который не должен учитываться при поиске (например CANCELLED)
      * @param checkOutDate дата выезда из запрашиваемого периода (меньше этой даты)
      * @param checkInDate  дата заезда в запрашиваемый период (больше этой даты)
      * @return {@code true}  если найдены конфликтующие бронирования
      */
     boolean existsByRoom_IdAndStatusNotAndCheckInDateLessThanAndCheckOutDateGreaterThan(
-            UUID id,
+            UUID roomId,
             BookingStatus status,
             LocalDate checkOutDate,
             LocalDate checkInDate);
+
+    Optional<BookingEntity> findByIdAndUser_Id(UUID bookingId, UUID userId);
+
+    Page<BookingEntity> findAllByStatus(BookingStatus status, Pageable pageable);
 }
