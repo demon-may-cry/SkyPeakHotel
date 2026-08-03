@@ -48,11 +48,13 @@ public interface BookingMapper {
             "checkedOut",
             "active",
             "nights",
-            "pricePerNight"
+            "pricePerNight",
+            "updatedAt"
     })
     @Mapping(source = "room.id", target = "roomId")
     @Mapping(source = "room.roomNumber", target = "roomNumber")
-    @Mapping(source = "room.roomType.slug", target = "roomType")
+    @Mapping(source = "room.roomType.slug", target = "roomTypeSlug")
+    @Mapping(source = "room.roomType.title", target = "roomTypeName")
     @Mapping(source = "checkInDate", target = "checkIn")
     @Mapping(source = "checkOutDate", target = "checkOut")
     BookingResponse toDto(BookingEntity booking);

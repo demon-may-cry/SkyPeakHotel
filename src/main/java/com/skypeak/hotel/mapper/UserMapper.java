@@ -44,7 +44,8 @@ public interface UserMapper {
             "user",
             "active",
             "blocked",
-            "password"
+            "password",
+            "updatedAt"
     })
     @Mapping(source = "role.name", target = "role")
     UserResponse toDto(UserEntity userEntity);

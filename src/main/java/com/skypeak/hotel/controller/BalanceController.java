@@ -11,11 +11,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+
+import static org.springframework.data.domain.Sort.Direction.DESC;
 
 /**
  * Контроллер для управления балансом пользователя.
@@ -58,6 +62,7 @@ public class BalanceController {
      * @param userDetails данные аутентифицированного пользователя.
      */
     @PostMapping("/deposit")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deposit(@RequestBody @Valid DepositRequest request,
                         @AuthenticationPrincipal CustomUserDetails userDetails) {
         log.info("▶️ Запрос на пополнение баланса для пользователя {} на сумму {}", userDetails.getUsername(), request.getAmount());
@@ -77,6 +82,10 @@ public class BalanceController {
      */
     @GetMapping("/transactions")
     public Page<TransactionResponse> getTransactions(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                     @PageableDefault(
+                                                             sort = "createdAt",
+                                                             direction = DESC
+                                                     )
                                                      Pageable pageable) {
         log.info("▶️ Запрос на получение истории транзакций для пользователя: {}. Параметры: {}", userDetails.getUsername(), pageable);
         Page<TransactionResponse> transactions = balanceService

@@ -20,7 +20,7 @@ import java.time.LocalDate;
 public class BookingRequest {
 
     /**
-     * Уникальный идентификатор типа комнаты, которую хочет забронировать пользователь.
+     * Уникальный slug типа номера (standard, apartments, suite).
      * Не должна быть пустой.
      */
     @NotBlank
