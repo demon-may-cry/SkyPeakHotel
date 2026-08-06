@@ -5,7 +5,6 @@ import com.skypeak.hotel.dto.booking.BookingResponse;
 import com.skypeak.hotel.entity.BookingEntity;
 import com.skypeak.hotel.entity.RoomEntity;
 import com.skypeak.hotel.entity.UserEntity;
-import com.skypeak.hotel.entity.enums.BookingStatus;
 import com.skypeak.hotel.mapper.BookingMapper;
 import com.skypeak.hotel.repository.BookingRepository;
 import com.skypeak.hotel.repository.RoomRepository;
@@ -24,10 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
+
+import static com.skypeak.hotel.entity.enums.BookingStatus.*;
+import static java.text.MessageFormat.format;
 
 
 /**
@@ -59,11 +60,11 @@ public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
-    /*private final BalanceService balanceService;*/
+    private final BalanceService balanceService;
     private final RoomService roomService;
     private final UserService userService;
     private final BookingMapper bookingMapper;
-    //TODO: create booking
+
     /**
      * {@inheritDoc}
      */
@@ -94,17 +95,7 @@ public class BookingServiceImpl implements BookingService {
         BigDecimal totalPrice = roomService.calculatePriceForDays(room, nights);
         log.info("💰 Рассчитана стоимость бронирования. Ночей: {}, Сумма: {}", nights, totalPrice);
 
-        // ===== ЭТАП 2: ФИНАНСОВЫЕ ОПЕРАЦИИ =====
-
-        // Проверка достаточности средств
-        /*validateUserBalance(user, totalPrice);*/
-
-        /*log.debug("💳 Начисление платежа пользователю: {}", userId);
-
-        String paymentDescription = buildPaymentDescription(availableRoom.getRoomNumber(), request.getCheckIn(), request.getCheckOut());
-        balanceService.withdraw(user.getId(), totalPrice, paymentDescription);*/
-
-        // ===== ЭТАП 3: СОЗДАНИЕ БРОНИРОВАНИЯ =====
+        // ===== ЭТАП 2: СОЗДАНИЕ БРОНИРОВАНИЯ =====
         BookingEntity booking = buildBooking(user, room, request, totalPrice);
 
         BookingEntity savedBooking = bookingRepository.save(booking);
@@ -118,23 +109,16 @@ public class BookingServiceImpl implements BookingService {
      * {@inheritDoc}
      */
     @Override
-    public void cancelBooking(String email, UUID bookingId) {
-        log.info("▶️ Запрос на отмену бронирования. ID: {}, Пользователь: {}", bookingId, email);
+    public void cancelBooking(String email, UUID id) {
+        log.info("▶️ Запрос на отмену бронирования. ID: {}, Пользователь: {}", id, email);
 
         // Получение бронирования
-        BookingEntity booking = bookingRepository.findById(bookingId).orElseThrow(() -> {
-            log.warn("⚠️ Бронирование не найдено. ID: {}", bookingId);
-            return new EntityNotFoundException("Бронирование не найдено.");
-        });
+        BookingEntity booking = getBooking(id);
 
         // Проверка прав владельца
         UserEntity user = getUser(email);
 
-        if (!booking.getUser().getId().equals(user.getId())) {
-            log.warn("🚫 Попытка отмены чужого бронирования. ID: {}, Владелец: {}, Заказчик: {}",
-                    bookingId, booking.getUser().getId(), user.getId());
-            throw new SecurityException("Вы не имеете права отменять это бронирование");
-        }
+        validateBookingOwner(booking, user);
 
         // Проверка статуса бронирования
         validateBookingStatusForCancellation(booking);
@@ -152,9 +136,9 @@ public class BookingServiceImpl implements BookingService {
         balanceService.deposit(user.getId(), refund, refundDescription);*/
 
         // Сохранение статуса отмены
-        booking.setStatus(BookingStatus.CANCELLED);
+        booking.setStatus(CANCELLED);
         bookingRepository.save(booking);
-        log.info("✅ Бронирование успешно отменено. ID: {}, Возврат: {}", bookingId, refund);
+        log.info("✅ Бронирование успешно отменено. ID: {}, Возврат: {}", id, refund);
     }
 
     /**
@@ -175,7 +159,70 @@ public class BookingServiceImpl implements BookingService {
         return bookings.map(bookingMapper::toDto);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BookingResponse payBooking(String email, UUID id) {
+        log.info("▶️ Запрос на оплату бронирования. ID: {}, Пользователь: {}", id, email);
+
+        // Получение пользователя
+        UserEntity user = getUser(email);
+
+        // Получение бронирования
+        BookingEntity booking = getBooking(id);
+
+        // Проверка прав владельца
+        validateBookingOwner(booking, user);
+
+        // Проверка статуса бронирования
+        validateBookingStatusForPay(booking);
+
+        validateUserBalance(user, booking.getTotalPrice());
+
+        balanceService.withdraw(user.getId(), booking.getTotalPrice(), buildPaymentDescription(
+                booking.getRoom().getRoomNumber(),
+                booking.getCheckInDate(),
+                booking.getCheckOutDate()
+        ));
+
+        confirmBooking(booking);
+
+        BookingEntity savedBooking = bookingRepository.save(booking);
+        log.info(
+                "✅ Бронирование {} успешно оплачено пользователем {} на сумму {}",
+                booking.getId(),
+                user.getEmail(),
+                booking.getTotalPrice()
+        );
+
+        return bookingMapper.toDto(savedBooking);
+    }
+
     // ===== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ =====
+
+    /**
+     * Получает бронирование по ID.
+     */
+    private @NonNull BookingEntity getBooking(UUID id) {
+        return bookingRepository.findById(id).orElseThrow(() -> {
+            log.warn("⚠️ Бронирование не найдено. ID: {}", id);
+            return new EntityNotFoundException("Бронирование не найдено.");
+        });
+    }
+
+    /**
+     * Проверяет владельца бронирования.
+     * @param booking
+     * @param user
+     */
+    private static void validateBookingOwner(BookingEntity booking, UserEntity user) {
+        if (!booking.getUser().getId().equals(user.getId())) {
+            log.warn("🚫 Попытка доступа к чужому бронированию. ID: {}, Владелец: {}, Заказчик: {}",
+                    booking.getId(), booking.getUser().getEmail(), user.getEmail());
+            throw new SecurityException("Вы не имеете доступа к этому бронированию.");
+        }
+    }
 
     /**
      * Проверяет доступность комнаты на указанный период.
@@ -202,7 +249,7 @@ public class BookingServiceImpl implements BookingService {
                     bookingRepository
                             .existsByRoom_IdAndStatusNotAndCheckInDateLessThanAndCheckOutDateGreaterThan(
                                     room.getId(),
-                                    BookingStatus.CANCELLED,
+                                    CANCELLED,
                                     checkOut,
                                     checkIn
                             );
@@ -256,14 +303,14 @@ public class BookingServiceImpl implements BookingService {
         booking.setCheckOutDate(request.getCheckOut());
         booking.setGuestsCount(request.getGuestsCount());
         booking.setTotalPrice(totalPrice);
-        booking.setStatus(BookingStatus.PENDING);
+        booking.setStatus(PENDING);
         return booking;
     }
 
     private @NonNull UserEntity getUser(String email) {
         UserEntity user = userService.getUserByEmail(email);
         if (!user.isActive()) {
-            log.warn("⚠️ Попытка бронирования неактивным пользователем. Пользователь ID: {}", user.getId());
+            log.warn("⚠️ Попытка бронирования/оплаты/отмены неактивным пользователем. Пользователь ID: {}", user.getId());
             throw new IllegalStateException("Ваш аккаунт неактивен.");
         }
         return user;
@@ -276,14 +323,14 @@ public class BookingServiceImpl implements BookingService {
      * @param amount требуемая сумма
      * @throws IllegalStateException если средств недостаточно
      */
-    /*private void validateUserBalance(UserEntity user, BigDecimal amount) {
+    private void validateUserBalance(UserEntity user, BigDecimal amount) {
         BigDecimal balance = balanceService.getBalance(user.getId());
         if (balance.compareTo(amount) < 0) {
             log.warn("⚠️ Недостаточно средств. Пользователь ID: {}, Необходимо: {}, Доступно: {}",
                     user.getId(), amount, balance);
             throw new IllegalStateException("Недостаточно средств на счете.");
         }
-    }*/
+    }
 
     /**
      * Проверяет возможность отмены бронирования.
@@ -292,15 +339,41 @@ public class BookingServiceImpl implements BookingService {
      * @throws IllegalStateException если отмена невозможна
      */
     private void validateBookingStatusForCancellation(BookingEntity booking) {
-        if (booking.getStatus() == BookingStatus.CANCELLED) {
+        if (booking.getStatus() == CANCELLED) {
             log.warn("⚠️ Бронирование уже отменено. ID: {}", booking.getId());
             throw new IllegalStateException("Бронирование уже отменено.");
         }
 
-        if (booking.getStatus() == BookingStatus.CHECKED_OUT) {
+        if (booking.getStatus() == CHECKED_OUT) {
             log.warn("⚠️ Невозможно отменить завершенное бронирование. ID: {}", booking.getId());
             throw new IllegalStateException("Невозможно отменить завершенное бронирование.");
         }
+    }
+
+    /**
+     * Проверяет возможность оплаты бронирования.
+     *
+     * @param booking бронирование для проверки
+     * @throws IllegalStateException если оплата невозможна
+     */
+    private void validateBookingStatusForPay(BookingEntity booking) {
+        if (booking.getStatus() != PENDING) {
+
+            log.warn(
+                    "⚠️ Попытка оплаты бронирования со статусом {}. ID: {}",
+                    booking.getStatus(),
+                    booking.getId()
+            );
+
+            throw new IllegalStateException(
+                    "Оплатить можно только бронирование со статусом PENDING."
+            );
+
+        }
+    }
+
+    private static void confirmBooking(BookingEntity booking) {
+        booking.setStatus(CONFIRMED);
     }
 
     /**
@@ -311,9 +384,9 @@ public class BookingServiceImpl implements BookingService {
      * @param checkOut дата выезда
      * @return строка описания платежа
      */
-    /*private String buildPaymentDescription(String roomNumber, LocalDate checkIn, LocalDate checkOut) {
+    private String buildPaymentDescription(String roomNumber, LocalDate checkIn, LocalDate checkOut) {
         return format("Оплата за бронирование номера {0} с {1} по {2}", roomNumber, checkIn, checkOut);
-    }*/
+    }
 
     /**
      * Формирует описание возврата средств.

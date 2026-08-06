@@ -60,6 +60,18 @@ public class BookingController {
         return response;
     }
 
+    @PostMapping("/{id}/pay")
+    @ResponseStatus(HttpStatus.OK)
+    public BookingResponse payBooking(@PathVariable UUID id) {
+        String email = currentUserService.getCurrentUserEmail();
+        log.info("▶️ Получен запрос на оплату бронирования {} от пользователя {}", id, email);
+
+        BookingResponse response = bookingService.payBooking(email, id);
+        log.info("✅ Бронирование {} успешно оплачено пользователем {}", id, email);
+
+        return response;
+    }
+
     /**
      * Возвращает историю бронирований текущего пользователя.
      *

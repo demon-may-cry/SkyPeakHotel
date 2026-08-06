@@ -74,4 +74,11 @@ public interface BookingService {
      */
     Page<BookingResponse> getUserBookings(String email, Pageable pageable);
 
+    /**
+     *
+     * @param email
+     * @param id
+     * @return
+     */
+    BookingResponse payBooking(String email, UUID id);
 }
