@@ -1,12 +1,11 @@
 HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
+backend/target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 .env
 .dockerignore
 amplicode.xml
-logs
+logs/
 frontend/node_modules
 frontend/dist
 

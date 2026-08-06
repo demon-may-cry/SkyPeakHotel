@@ -10,15 +10,18 @@ FROM maven:3.9.9-eclipse-temurin-21 AS build
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем файлы проекта
+# Копируем pom отдельно для кэширования зависимостей
 COPY pom.xml .
+RUN mvn dependency:go-offline
+
+# Копируем исходники
 COPY src ./src
 
 # Собираем приложение (пропускаем тесты для скорости сборки)
 RUN mvn clean package -DskipTests
 
 # Стадия 2: Запуск приложения
-FROM eclipse-temurin:21-jdk-jammy
+FROM eclipse-temurin:21-jre-jammy
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
@@ -27,7 +30,7 @@ WORKDIR /app
 RUN groupadd -r skypeak && useradd -r -g skypeak skypeak
 
 # Копируем JAR файл из стадии сборки
-COPY --from=build /app/target/hotel-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 
 # Меняем владельца файлов
 RUN chown -R skypeak:skypeak /app
@@ -42,6 +45,6 @@ EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 
 # Метаданные
-LABEL maintainer="SkyPeak Hotel Team"
-LABEL description="SkyPeak Hotel Management System"
-LABEL version="0.0.1-SNAPSHOT"
+LABEL maintainer="Dmitry Eltsov"
+LABEL description="SkyPeak Hotel Backend"
+LABEL version="1.0.0"
