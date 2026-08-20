@@ -76,7 +76,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Пропускаем обработку для swagger и api-docs
         if (request.getRequestURI().contains("/swagger") ||
-                request.getRequestURI().contains("/v3/api-docs")) {
+                request.getRequestURI().contains("/v3/api-docs") ||
+                request.getRequestURI().contains("/api/v1/analytics/visit")) {
             log.debug("🔓 Запрос к Swagger/API-docs {}. Пропускаем фильтр.", request.getRequestURI());
             filterChain.doFilter(request, response);
             return;

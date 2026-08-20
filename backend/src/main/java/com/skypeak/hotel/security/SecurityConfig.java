@@ -81,6 +81,7 @@ public class SecurityConfig {
                                 "/api/v1/room-types/**",
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/register",
+                                "/api/v1/analytics/visit",
                                 "/error",
                                 "/actuator/health",
                                 "/swagger/**",
@@ -134,7 +135,9 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(
                 List.of(
-                        "http://localhost:5173"
+                        "http://localhost:5173",
+                        "https://skypeakhotel.com",
+                        "https://www.skypeakhotel.com"
                 )
         );
 
