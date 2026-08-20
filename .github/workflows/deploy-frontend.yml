@@ -1,0 +1,60 @@
+name: Deploy SkyPeak Hotel Frontend
+
+on:
+  push:
+    branches:
+      - frontend
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Deploy to VPS
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/skypeak-github-actions
+          chmod 600 ~/.ssh/skypeak-github-actions
+
+          ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
+
+          tar -czf - -C frontend/dist . | \
+          ssh -i ~/.ssh/skypeak-github-actions \
+            "$SERVER_USER@$SERVER_HOST" \
+            'rm -rf /opt/skypeak-hotel/dist.new && \
+             mkdir -p /opt/skypeak-hotel/dist.new && \
+             tar -xzf - -C /opt/skypeak-hotel/dist.new && \
+             rm -rf /opt/skypeak-hotel/dist.old && \
+             mv /opt/skypeak-hotel/dist /opt/skypeak-hotel/dist.old && \
+             mv /opt/skypeak-hotel/dist.new /opt/skypeak-hotel/dist && \
+             rm -rf /opt/skypeak-hotel/dist.old'
