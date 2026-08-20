@@ -11,30 +11,28 @@ jobs:
 
     steps:
 
-      # 1. Получаем исходный код
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Авторизация в Docker Hub
+      - name: Set image tag
+        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 3. Сборка Docker image
       - name: Build Docker image
         run: |
           docker build \
-            -t dmitryeltsov/skypeak-hotel-backend:latest \
+            -t dmitryeltsov/skypeak-hotel-backend:${IMAGE_TAG} \
             ./backend
 
-      # 4. Отправка image в Docker Hub
       - name: Push Docker image
         run: |
-          docker push dmitryeltsov/skypeak-hotel-backend:latest
+          docker push dmitryeltsov/skypeak-hotel-backend:${IMAGE_TAG}
 
-      # 5. Подключение к VPS и обновление backend
       - name: Deploy to VPS
         env:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
@@ -52,5 +50,6 @@ jobs:
           ssh -i ~/.ssh/skypeak-github-actions \
             "$SERVER_USER@$SERVER_HOST" \
             "cd /opt/skypeak-hotel && \
-             docker compose pull backend && \
-             docker compose up -d --no-deps backend"
+             echo 'IMAGE_TAG=${IMAGE_TAG}' > .env.deploy && \
+             docker compose --env-file .env --env-file .env.deploy pull backend && \
+             docker compose --env-file .env --env-file .env.deploy up -d --no-deps backend"
