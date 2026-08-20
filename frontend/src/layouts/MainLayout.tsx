@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import DisclaimerModal from "../components/DisclaimerModal";
 import Header from "../components/Header";
