@@ -8,6 +8,6 @@ export interface UpdateUserProfileRequest {
 
     phoneNumber: string;
 
-    birthDate: string;
+    birthDate: string | null;
 
 }
