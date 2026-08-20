@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 
 export default function DisclaimerModal() {
 
-    const [isOpen, setIsOpen] =
-        useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
 
@@ -14,14 +13,17 @@ export default function DisclaimerModal() {
     const handleClose = () => {
 
         setIsOpen(false);
+
     };
 
     if (!isOpen) {
 
         return null;
+
     }
 
     return (
+
         <div
             className="
                 fixed
@@ -33,7 +35,8 @@ export default function DisclaimerModal() {
                 bg-black/70
                 backdrop-blur-md
                 animate-fadeIn
-                px-6
+                p-4
+                sm:px-6
             "
         >
 
@@ -42,11 +45,15 @@ export default function DisclaimerModal() {
                     relative
                     w-full
                     max-w-2xl
+                    max-h-[calc(100dvh-2rem)]
+                    overflow-y-auto
+                    overscroll-contain
                     rounded-3xl
                     border
                     border-white/10
-                    bg-white/10
-                    p-10
+                    bg-zinc-900/95
+                    p-6
+                    sm:p-10
                     text-white
                     shadow-2xl
                     backdrop-blur-xl
@@ -55,14 +62,25 @@ export default function DisclaimerModal() {
             >
 
                 <button
+                    type="button"
                     onClick={handleClose}
+                    aria-label="Закрыть уведомление"
                     className="
                         absolute
-                        right-5
-                        top-5
+                        right-4
+                        top-3
+                        z-10
+                        flex
+                        h-10
+                        w-10
+                        items-center
+                        justify-center
+                        rounded-full
                         text-3xl
-                        text-gray-300
+                        leading-none
+                        text-gray-400
                         transition
+                        hover:bg-white/10
                         hover:text-white
                     "
                 >
@@ -74,7 +92,8 @@ export default function DisclaimerModal() {
                         uppercase
                         tracking-[0.3em]
                         text-gray-400
-                        text-sm
+                        text-xs
+                        sm:text-sm
                     "
                 >
                     Важно
@@ -83,8 +102,10 @@ export default function DisclaimerModal() {
                 <h2
                     className="
                         mt-4
-                        text-3xl
+                        pr-10
+                        text-2xl
                         font-bold
+                        sm:text-3xl
                     "
                 >
                     Информационное уведомление
@@ -94,8 +115,10 @@ export default function DisclaimerModal() {
                     className="
                         mt-6
                         space-y-5
+                        text-base
                         leading-relaxed
                         text-gray-300
+                        sm:text-lg
                     "
                 >
 
@@ -135,6 +158,7 @@ export default function DisclaimerModal() {
                 </div>
 
                 <button
+                    type="button"
                     onClick={handleClose}
                     className="
                         mt-8
@@ -142,12 +166,15 @@ export default function DisclaimerModal() {
                         rounded-2xl
                         bg-white
                         px-6
-                        py-4
-                        text-lg
+                        py-3
+                        text-base
                         font-semibold
                         text-black
                         transition
                         hover:bg-gray-200
+                        active:scale-[0.98]
+                        sm:py-4
+                        sm:text-lg
                     "
                 >
                     Понятно
@@ -156,5 +183,7 @@ export default function DisclaimerModal() {
             </div>
 
         </div>
+
     );
+
 }
