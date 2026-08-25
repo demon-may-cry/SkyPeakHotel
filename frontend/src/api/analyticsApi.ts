@@ -12,11 +12,19 @@ export const registerVisit = async (): Promise<void> => {
     }
 
     const timezone =
-        Intl.DateTimeFormat().resolvedOptions().timeZone;
+        Intl.DateTimeFormat()
+            .resolvedOptions()
+            .timeZone;
 
-    await api.post("/analytics/visit", {
-        timezone
-    });
+    await api.post(
+        "/analytics/visit",
+        {
+            timezone
+        }
+    );
 
-    sessionStorage.setItem(VISIT_KEY, "true");
+    sessionStorage.setItem(
+        VISIT_KEY,
+        "true"
+    );
 };
