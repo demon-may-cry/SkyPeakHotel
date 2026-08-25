@@ -58,11 +58,18 @@ public class VisitorNotificationServiceImpl implements VisitorNotificationServic
         String browser = detectBrowser(userAgent);
         String operatingSystem = detectOperatingSystem(userAgent);
 
+        boolean bot = isBot(userAgent);
+        String visitorType = bot
+                ? "🤖 Сканировщик / Bot"
+                : "👤 Посетитель";
+
         String time = LocalDateTime.now()
                 .format(DATE_TIME_FORMATTER);
 
         String message = """
                 🌐 Новый посетитель SkyPeak Hotel
+                
+                %s
                 
                 🌍 IP: %s
                 📍 Страна: %s
@@ -74,6 +81,7 @@ public class VisitorNotificationServiceImpl implements VisitorNotificationServic
                 
                 🖥️ User-Agent: %s
                 """.formatted(
+                        visitorType,
                         ipAddress,
                         location.country(),
                         location.city(),
@@ -96,6 +104,26 @@ public class VisitorNotificationServiceImpl implements VisitorNotificationServic
                     e
             );
         }
+    }
+
+    public boolean isBot(String userAgent) {
+
+        if (userAgent == null || userAgent.isBlank()) {
+            return true;
+        }
+
+        String ua = userAgent.toLowerCase();
+
+        return ua.contains("bot")
+                || ua.contains("crawler")
+                || ua.contains("spider")
+                || ua.contains("scraper")
+                || ua.contains("scanner")
+                || ua.contains("curl")
+                || ua.contains("wget")
+                || ua.contains("postmanruntime")
+                || ua.contains("python-requests")
+                || ua.contains("go-http-client");
     }
 
     private String detectBrowser(String userAgent) {
