@@ -11,5 +11,5 @@ public interface VisitorNotificationService {
      * @param ipAddress IP-адрес посетителя
      * @param userAgent строка User-Agent посетителя
      */
-    void notifyVisit(String ipAddress, String userAgent);
+    void notifyVisit(String ipAddress, String userAgent, String timezone);
 }

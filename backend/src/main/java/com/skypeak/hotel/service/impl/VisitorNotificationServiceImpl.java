@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,7 +34,7 @@ public class VisitorNotificationServiceImpl implements VisitorNotificationServic
             new ConcurrentHashMap<>();
 
     @Override
-    public void notifyVisit(String ipAddress, String userAgent) {
+    public void notifyVisit(String ipAddress, String userAgent, String timezone) {
 
         Instant now = Instant.now();
 
@@ -63,7 +64,20 @@ public class VisitorNotificationServiceImpl implements VisitorNotificationServic
                 ? "🤖 Сканировщик / Bot"
                 : "👤 Посетитель";
 
-        String time = LocalDateTime.now()
+        ZoneId zoneId;
+
+        try {
+            zoneId = ZoneId.of(timezone);
+        } catch (Exception e) {
+            log.warn(
+                    "⚠️ Некорректный timezone: {}. Используем системный.",
+                    timezone
+            );
+
+            zoneId = ZoneId.systemDefault();
+        }
+
+        String time = LocalDateTime.now(zoneId)
                 .format(DATE_TIME_FORMATTER);
 
         String message = """
@@ -78,6 +92,7 @@ public class VisitorNotificationServiceImpl implements VisitorNotificationServic
                 🌐 Браузер: %s
                 💻 ОС: %s
                 🕐 Время: %s
+                🌎 Часовой пояс: %s
                 
                 🖥️ User-Agent: %s
                 """.formatted(
@@ -88,6 +103,7 @@ public class VisitorNotificationServiceImpl implements VisitorNotificationServic
                         browser,
                         operatingSystem,
                         time,
+                        timezone,
                         userAgent
                 );
 
