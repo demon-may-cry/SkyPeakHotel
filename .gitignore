@@ -8,6 +8,7 @@ amplicode.xml
 logs/
 frontend/node_modules
 frontend/dist
+geoip
 
 ### STS ###
 .apt_generated

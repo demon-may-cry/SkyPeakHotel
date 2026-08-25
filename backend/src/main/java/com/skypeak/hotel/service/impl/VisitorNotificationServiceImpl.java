@@ -1,5 +1,7 @@
 package com.skypeak.hotel.service.impl;
 
+import com.skypeak.hotel.dto.location.GeoLocation;
+import com.skypeak.hotel.service.GeoIpService;
 import com.skypeak.hotel.service.TelegramNotificationService;
 import com.skypeak.hotel.service.VisitorNotificationService;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +20,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class VisitorNotificationServiceImpl implements VisitorNotificationService {
 
-    private final TelegramNotificationService telegramNotificationService;
-
     private static final Duration NOTIFICATION_INTERVAL =
             Duration.ofMinutes(30);
-
+    private static final DateTimeFormatter
+            DATE_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern(
+                    "dd.MM.yyyy HH:mm:ss"
+            );
+    private final TelegramNotificationService telegramNotificationService;
+    private final GeoIpService geoIpService;
     private final Map<String, Instant> lastNotifications =
             new ConcurrentHashMap<>();
 
@@ -33,6 +39,9 @@ public class VisitorNotificationServiceImpl implements VisitorNotificationServic
 
         Instant lastNotification =
                 lastNotifications.get(ipAddress);
+
+        GeoLocation location =
+                geoIpService.getLocation(ipAddress);
 
         if (lastNotification != null &&
                 Duration.between(lastNotification, now)
@@ -53,21 +62,26 @@ public class VisitorNotificationServiceImpl implements VisitorNotificationServic
                 .format(DATE_TIME_FORMATTER);
 
         String message = """
-            🌐 Новый посетитель SkyPeak Hotel
-
-            🌍 IP: %s
-            🌐 Браузер: %s
-            💻 ОС: %s
-            🕐 Время: %s
-
-            🖥️ User-Agent: %s
-            """.formatted(
-                ipAddress,
-                browser,
-                operatingSystem,
-                time,
-                userAgent
-        );
+                🌐 Новый посетитель SkyPeak Hotel
+                
+                🌍 IP: %s
+                📍 Страна: %s
+                🏙️ Город: %s
+                
+                🌐 Браузер: %s
+                💻 ОС: %s
+                🕐 Время: %s
+                
+                🖥️ User-Agent: %s
+                """.formatted(
+                        ipAddress,
+                        location.country(),
+                        location.city(),
+                        browser,
+                        operatingSystem,
+                        time,
+                        userAgent
+                );
 
         try {
             telegramNotificationService.sendMessage(message);
@@ -142,10 +156,4 @@ public class VisitorNotificationServiceImpl implements VisitorNotificationServic
 
         return "Неизвестна";
     }
-
-    private static final DateTimeFormatter
-            DATE_TIME_FORMATTER =
-            DateTimeFormatter.ofPattern(
-                    "dd.MM.yyyy HH:mm:ss"
-            );
 }
