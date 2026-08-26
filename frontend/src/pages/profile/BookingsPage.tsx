@@ -126,6 +126,25 @@ export default function BookingsPage() {
 
     }
 
+    function formatBookingDate(date: string) {
+        return new Date(date).toLocaleDateString("ru-RU", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+        });
+    }
+
+    function getNights(checkIn: string, checkOut: string) {
+
+        const start = new Date(checkIn);
+        const end = new Date(checkOut);
+
+        return Math.round(
+            (end.getTime() - start.getTime()) /
+            (1000 * 60 * 60 * 24)
+        );
+    }
+
     function getStatusClass(
         status: Booking["status"]
     ) {
@@ -261,112 +280,184 @@ export default function BookingsPage() {
                     <div
                         key={booking.id}
                         className="
-                            rounded-3xl
-                            border
-                            border-zinc-800
-                            bg-zinc-900/50
-                            p-6
-                            transition
-                            hover:border-zinc-700
-                        "
+            rounded-3xl
+            border
+            border-zinc-800
+            bg-zinc-900/50
+            p-6
+            transition
+            hover:border-zinc-700
+        "
                     >
 
                         <div
                             className="
-                                flex
-                                flex-col
-                                gap-6
-                                lg:flex-row
-                                lg:items-center
-                                lg:justify-between
-                            "
+                flex
+                flex-col
+                gap-6
+                lg:flex-row
+                lg:items-center
+                lg:justify-between
+            "
                         >
 
-                            <div>
+                            {/* Левая часть */}
+
+                            <div className="flex items-start gap-5">
+
+                                {/* Иконка */}
 
                                 <div
                                     className="
-                                        flex
-                                        flex-wrap
-                                        items-center
-                                        gap-3
-                                    "
+                        flex
+                        h-14
+                        w-14
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-2xl
+                        bg-blue-600/10
+                        text-blue-400
+                    "
                                 >
-
-                                    <h2 className="text-xl font-semibold text-white">
-
-                                        {booking.roomTypeName}
-
-                                    </h2>
-
-                                    <span
-                                        className={`
-                                            rounded-full
-                                            border
-                                            px-3
-                                            py-1
-                                            text-xs
-                                            font-medium
-                                            ${getStatusClass(
-                                            booking.status
-                                        )}
-                                        `}
-                                    >
-                                        {getStatusLabel(
-                                            booking.status
-                                        )}
-                                    </span>
-
+                                    🏨
                                 </div>
 
-                                <div className="mt-4 space-y-2 text-sm text-zinc-400">
+                                <div>
 
-                                    <p>
-                                        Комната №
-                                        <span className="text-zinc-200">
-                                            {booking.roomNumber}
-                                        </span>
-                                    </p>
+                                    {/* Название + статус */}
 
-                                    <p>
-                                        {booking.checkIn}
-                                        {" — "}
-                                        {booking.checkOut}
-                                    </p>
+                                    <div
+                                        className="
+                            flex
+                            flex-wrap
+                            items-center
+                            gap-3
+                        "
+                                    >
 
-                                    <p>
-                                        Гостей:{" "}
-                                        <span className="text-zinc-200">
-                                            {booking.guestsCount}
-                                        </span>
-                                    </p>
+                                        <h2 className="text-xl font-semibold text-white">
+                                            {booking.roomTypeName}
+                                        </h2>
+
+                                        <span
+                                            className={`
+                                rounded-full
+                                border
+                                px-3
+                                py-1
+                                text-xs
+                                font-medium
+                                ${getStatusClass(
+                                                booking.status
+                                            )}
+                            `}
+                                        >
+                            {getStatusLabel(
+                                booking.status
+                            )}
+                        </span>
+
+                                    </div>
+
+                                    {/* Информация */}
+
+                                    <div
+                                        className="
+                            mt-5
+                            grid
+                            grid-cols-1
+                            gap-x-10
+                            gap-y-4
+                            sm:grid-cols-2
+                        "
+                                    >
+
+                                        <div>
+
+                                            <p className="text-xs uppercase tracking-wider text-zinc-500">
+                                                Комната
+                                            </p>
+
+                                            <p className="mt-1 text-sm text-zinc-200">
+                                                №{booking.roomNumber}
+                                            </p>
+
+                                        </div>
+
+                                        <div>
+
+                                            <p className="text-xs uppercase tracking-wider text-zinc-500">
+                                                Даты проживания
+                                            </p>
+
+                                            <p className="mt-1 text-sm text-zinc-200">
+                                                {formatBookingDate(booking.checkIn)}
+                                                {" — "}
+                                                {formatBookingDate(booking.checkOut)}
+                                            </p>
+
+                                            <p className="mt-1 text-xs text-zinc-500">
+                                                {getNights(
+                                                    booking.checkIn,
+                                                    booking.checkOut
+                                                )}{" "}
+                                                {getNights(
+                                                    booking.checkIn,
+                                                    booking.checkOut
+                                                ) === 1
+                                                    ? "ночь"
+                                                    : "ночей"}
+                                            </p>
+
+                                        </div>
+
+                                        <div>
+
+                                            <p className="text-xs uppercase tracking-wider text-zinc-500">
+                                                Гостей
+                                            </p>
+
+                                            <p className="mt-1 text-sm text-zinc-200">
+                                                {booking.guestsCount}
+                                            </p>
+
+                                        </div>
+
+                                    </div>
 
                                 </div>
 
                             </div>
 
+                            {/* Правая часть */}
+
                             <div
                                 className="
-                                    flex
-                                    flex-col
-                                    items-start
-                                    gap-4
-                                    lg:items-end
-                                "
+                    flex
+                    shrink-0
+                    flex-col
+                    items-start
+                    gap-4
+                    border-t
+                    border-zinc-800
+                    pt-5
+                    lg:items-end
+                    lg:border-t-0
+                    lg:border-l
+                    lg:pl-8
+                    lg:pt-0
+                "
                             >
 
                                 <div>
 
-                                    <p className="text-sm text-zinc-500">
+                                    <p className="text-xs uppercase tracking-wider text-zinc-500">
                                         Стоимость
                                     </p>
 
                                     <p className="mt-1 text-2xl font-bold text-white">
-
-                                        {booking.totalPrice.toLocaleString(
-                                            "ru-RU"
-                                        )} ₽
-
+                                        {booking.totalPrice.toLocaleString("ru-RU")} ₽
                                     </p>
 
                                 </div>
@@ -376,21 +467,21 @@ export default function BookingsPage() {
                                     <button
                                         type="button"
                                         onClick={() =>
-                                            setBookingToPay(
-                                                booking
-                                            )
+                                            setBookingToPay(booking)
                                         }
                                         className="
-                                            rounded-xl
-                                            bg-blue-600
-                                            px-6
-                                            py-3
-                                            font-medium
-                                            text-white
-                                            transition
-                                            hover:bg-blue-700
-                                            active:scale-[0.98]
-                                        "
+                            w-full
+                            rounded-xl
+                            bg-blue-600
+                            px-6
+                            py-3
+                            font-medium
+                            text-white
+                            transition
+                            hover:bg-blue-700
+                            active:scale-[0.98]
+                            lg:w-auto
+                        "
                                     >
                                         Оплатить
                                     </button>
@@ -400,8 +491,8 @@ export default function BookingsPage() {
                                 {booking.status === "CONFIRMED" && (
 
                                     <span className="text-sm text-green-400">
-                                        ✓ Оплачено
-                                    </span>
+                        ✓ Оплачено
+                    </span>
 
                                 )}
 
@@ -416,23 +507,23 @@ export default function BookingsPage() {
             </div>
 
             <ConfirmModal
-                open={bookingToPay !== null}
+                isOpen={bookingToPay !== null}
                 loading={paymentLoading}
                 title="Оплата бронирования"
-                description={
+                message={
                     bookingToPay
                         ? `Оплатить бронирование номера №${bookingToPay.roomNumber} на сумму ${bookingToPay.totalPrice.toLocaleString("ru-RU")} ₽?`
                         : ""
                 }
                 confirmText="Оплатить"
                 cancelText="Отмена"
+                loadingText="Оплата..."
+                confirmButtonClassName="bg-blue-600 hover:bg-blue-700"
                 onConfirm={handlePayBooking}
                 onCancel={() => {
-
                     if (!paymentLoading) {
                         setBookingToPay(null);
                     }
-
                 }}
             />
 
