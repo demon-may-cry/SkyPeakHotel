@@ -8,6 +8,7 @@ import {
 import type { ReactNode } from "react";
 
 import { getBalance } from "../api/balanceApi";
+import { useAuth } from "./AuthContext";
 
 interface BalanceContextType {
 
@@ -15,24 +16,32 @@ interface BalanceContextType {
 
     refreshBalance: () => Promise<void>;
 
+    clearBalance: () => void;
+
 }
 
 const BalanceContext =
     createContext<BalanceContextType | null>(null);
 
 export function BalanceProvider({
-
                                     children,
-
                                 }: {
     children: ReactNode;
-})
-{
+}) {
+
+    const { isAuthenticated } = useAuth();
 
     const [balance, setBalance] =
         useState(0);
 
     async function refreshBalance() {
+
+        if (!isAuthenticated) {
+
+            setBalance(0);
+
+            return;
+        }
 
         try {
 
@@ -49,11 +58,25 @@ export function BalanceProvider({
 
     }
 
+    function clearBalance() {
+
+        setBalance(0);
+
+    }
+
     useEffect(() => {
 
-        refreshBalance();
+        if (isAuthenticated) {
 
-    }, []);
+            refreshBalance();
+
+        } else {
+
+            clearBalance();
+
+        }
+
+    }, [isAuthenticated]);
 
     return (
 
@@ -61,6 +84,7 @@ export function BalanceProvider({
             value={{
                 balance,
                 refreshBalance,
+                clearBalance,
             }}
         >
 
