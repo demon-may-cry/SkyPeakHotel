@@ -1,3 +1,5 @@
+import { Mail, Send, Code2 } from "lucide-react";
+
 export default function Footer() {
     return (
         <footer
@@ -9,7 +11,6 @@ export default function Footer() {
                 py-10
             "
         >
-
             <div
                 className="
                     mx-auto
@@ -22,9 +23,7 @@ export default function Footer() {
                     md:justify-between
                 "
             >
-
                 <div>
-
                     <h3
                         className="
                             text-2xl
@@ -38,25 +37,63 @@ export default function Footer() {
                     <p className="mt-2 text-gray-400">
                         Роскошный отдых в сердце гор
                     </p>
-
                 </div>
 
                 <div
                     className="
                         flex
-                        gap-6
+                        flex-wrap
+                        gap-5
                         text-gray-400
                     "
                 >
+                    <a
+                        href="mailto:demonmaycry@mail.ru"
+                        className="
+                            flex
+                            items-center
+                            gap-2
+                            transition-colors
+                            hover:text-white
+                        "
+                    >
+                        <Mail size={17} />
+                        <span>Email</span>
+                    </a>
 
-                    <span>Email</span>
-                    <span>Telegram</span>
-                    <span>GitHub</span>
+                    <a
+                        href="https://t.me/DmitryEltsov"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="
+                            flex
+                            items-center
+                            gap-2
+                            transition-colors
+                            hover:text-white
+                        "
+                    >
+                        <Send size={17} />
+                        <span>Telegram</span>
+                    </a>
 
+                    <a
+                        href="https://github.com/demon-may-cry"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="
+                            flex
+                            items-center
+                            gap-2
+                            transition-colors
+                            hover:text-white
+                        "
+                    >
+                        <Code2 size={17} />
+                        <span>GitHub</span>
+                    </a>
                 </div>
-
             </div>
-
         </footer>
     );
 }

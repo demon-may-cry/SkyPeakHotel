@@ -11,6 +11,7 @@ import BookingsPage from "../pages/profile/BookingsPage";
 import BalancePage from "../pages/profile/BalancePage";
 import TransactionsPage from "../pages/profile/TransactionsPage";
 import ProfileLayout from "../layouts/ProfileLayout.tsx";
+import ContactsPage from "../pages/ContactsPage";
 
 export const router = createBrowserRouter([
     {
@@ -25,6 +26,11 @@ export const router = createBrowserRouter([
             {
                 path: "rooms",
                 element: <RoomsPage />,
+            },
+
+            {
+                path: "contacts",
+                element: <ContactsPage />,
             },
 
             {

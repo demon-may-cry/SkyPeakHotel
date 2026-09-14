@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 interface ConfirmModalProps {
     isOpen: boolean;
@@ -29,62 +30,98 @@ export default function ConfirmModal({
                                          cancelText = "Отмена",
                                          loadingText = "Выполняется...",
 
-                                         confirmButtonClassName = "bg-red-600 hover:bg-red-700",
+                                         confirmButtonClassName =
+                                         "bg-red-600 hover:bg-red-700",
 
                                          onConfirm,
                                          onCancel,
                                      }: ConfirmModalProps) {
 
     useEffect(() => {
+
         if (!isOpen || loading) {
             return;
         }
 
-        const handleKeyDown = (event: KeyboardEvent) => {
+        const handleKeyDown = (
+            event: KeyboardEvent
+        ) => {
+
             if (event.key === "Escape") {
                 onCancel();
             }
+
         };
 
-        window.addEventListener("keydown", handleKeyDown);
+        window.addEventListener(
+            "keydown",
+            handleKeyDown
+        );
 
         return () => {
-            window.removeEventListener("keydown", handleKeyDown);
+
+            window.removeEventListener(
+                "keydown",
+                handleKeyDown
+            );
+
         };
+
     }, [isOpen, loading, onCancel]);
 
+
     useEffect(() => {
+
         if (!isOpen) {
             return;
         }
 
-        const originalOverflow = document.body.style.overflow;
+        const originalOverflow =
+            document.body.style.overflow;
 
         document.body.style.overflow = "hidden";
 
         return () => {
-            document.body.style.overflow = originalOverflow;
+
+            document.body.style.overflow =
+                originalOverflow;
+
         };
+
     }, [isOpen]);
+
 
     if (!isOpen) {
         return null;
     }
 
-    return (
+
+    return createPortal(
+
         <div
             className="
-                fixed inset-0 z-50
-                flex items-center justify-center
-                bg-black/60
-                backdrop-blur-sm
+                fixed
+                inset-0
+                z-[9999]
+                flex
+                items-center
+                justify-center
+                overflow-y-auto
+                bg-black/70
                 px-4
+                py-6
             "
-            onClick={() => !loading && onCancel()}
+            onClick={() =>
+                !loading && onCancel()
+            }
         >
+
             <div
-                onClick={(event) => event.stopPropagation()}
+                onClick={(event) =>
+                    event.stopPropagation()
+                }
                 className="
+                    my-auto
                     w-full
                     max-w-md
                     rounded-2xl
@@ -95,17 +132,39 @@ export default function ConfirmModal({
                     shadow-2xl
                 "
             >
-                <h2 className="text-2xl font-bold text-white">
+
+                <h2
+                    className="
+                        text-2xl
+                        font-bold
+                        text-white
+                    "
+                >
                     {title}
                 </h2>
 
-                <div className="mt-4 text-zinc-300">
+
+                <div
+                    className="
+                        mt-4
+                        text-zinc-300
+                    "
+                >
                     {message}
                 </div>
 
-                <div className="mt-8 flex justify-end gap-3">
+
+                <div
+                    className="
+                        mt-8
+                        flex
+                        justify-end
+                        gap-3
+                    "
+                >
 
                     <button
+                        type="button"
                         onClick={onCancel}
                         disabled={loading}
                         className="
@@ -115,8 +174,8 @@ export default function ConfirmModal({
                             px-5
                             py-2
                             text-white
-                            hover:bg-zinc-800
                             transition-colors
+                            hover:bg-zinc-800
                             disabled:cursor-not-allowed
                             disabled:opacity-50
                         "
@@ -124,7 +183,9 @@ export default function ConfirmModal({
                         {cancelText}
                     </button>
 
+
                     <button
+                        type="button"
                         onClick={onConfirm}
                         disabled={loading}
                         className={`
@@ -147,6 +208,9 @@ export default function ConfirmModal({
 
             </div>
 
-        </div>
+        </div>,
+
+        document.body
+
     );
 }
